@@ -1,0 +1,19 @@
+{
+  "items": [
+    {
+      "title": "Premium fabric display",
+      "note": "Replace with actual showroom or hero fabric photos.",
+      "image": "https://picsum.photos/seed/mkf-gallery-1/900/700"
+    },
+    {
+      "title": "Occasion textile range",
+      "note": "Good for wedding and festive collection visibility.",
+      "image": "https://picsum.photos/seed/mkf-gallery-2/900/700"
+    },
+    {
+      "title": "Texture close-up",
+      "note": "Ideal for highlighting weave, finish, and detailing.",
+      "image": "https://picsum.photos/seed/mkf-gallery-3/900/700"
+    }
+  ]
+}

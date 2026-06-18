@@ -1,0 +1,37 @@
+backend:
+  name: git-gateway
+  branch: main
+
+media_folder: "uploads"
+public_folder: "/uploads"
+
+collections:
+  - name: "gallery"
+    label: "Gallery"
+    files:
+      - label: "Gallery Items"
+        name: "gallery_items"
+        file: "content/gallery.json"
+        format: "json"
+        fields:
+          - label: "Items"
+            name: "items"
+            widget: "list"
+            summary: "{{fields.title}}"
+            fields:
+              - { label: "Title", name: "title", widget: "string" }
+              - { label: "Note", name: "note", widget: "text", required: false }
+              - { label: "Image", name: "image", widget: "image" }
+
+  - name: "site_settings"
+    label: "Site Settings"
+    files:
+      - label: "Contact Details"
+        name: "contact"
+        file: "content/contact.json"
+        format: "json"
+        fields:
+          - { label: "Phone", name: "phone", widget: "string" }
+          - { label: "Email", name: "email", widget: "string" }
+          - { label: "Address", name: "address", widget: "text" }
+          - { label: "WhatsApp Link", name: "whatsapp", widget: "string" }

@@ -1,0 +1,10 @@
+{
+  "files": [
+    "index.html",
+    "README.md",
+    "admin/index.html",
+    "admin/config.yml",
+    "content/gallery.json",
+    "content/contact.json"
+  ]
+}
