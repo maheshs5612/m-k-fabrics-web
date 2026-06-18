@@ -10,13 +10,27 @@ collections:
     label: "Gallery"
     folder: "content/gallery"
     create: true
-    slug: "{{slug}}"
+    slug: "{{slug}}-{{year}}{{month}}{{day}}{{hour}}{{minute}}{{second}}"
     format: "json"
     extension: "json"
     label_singular: "Gallery Item"
-    summary: "{{title}}"
+    summary: "{{title}} — {{fields.category}}"
     fields:
       - { label: "Title", name: "title", widget: "string" }
+      - label: "Category"
+        name: "category"
+        widget: "select"
+        options:
+          - { label: "Rayon", value: "Rayon" }
+          - { label: "Cambric", value: "Cambric" }
+          - { label: "Poplin", value: "Poplin" }
+          - { label: "Modal", value: "Modal" }
+          - { label: "Yarn Dyed", value: "Yarn Dyed" }
+          - { label: "Cotton", value: "Cotton" }
+          - { label: "Suiting", value: "Suiting" }
+          - { label: "Shirting", value: "Shirting" }
+          - { label: "Other", value: "Other" }
+        default: "Other"
       - { label: "Note", name: "note", widget: "text", required: false }
       - { label: "Image", name: "image", widget: "image" }
 
