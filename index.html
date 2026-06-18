@@ -163,22 +163,14 @@
         /* ── Gallery ── */
         .gallery-section { margin-bottom: 3rem; }
         .gallery-category-header {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            margin-bottom: 1.25rem;
+            display: flex; align-items: center; gap: 1rem; margin-bottom: 1.25rem;
         }
         .gallery-category-header h3 {
-            font-family: var(--font-display);
-            font-size: var(--text-lg);
-            font-weight: 700;
-            white-space: nowrap;
+            font-family: var(--font-display); font-size: var(--text-lg);
+            font-weight: 700; white-space: nowrap;
         }
         .gallery-category-header::after {
-            content: '';
-            flex: 1;
-            height: 1px;
-            background: var(--color-divider);
+            content: ''; flex: 1; height: 1px; background: var(--color-divider);
         }
         .gallery-grid{
             display:grid;
@@ -193,8 +185,7 @@
         }
         .gallery-item:hover{box-shadow:var(--shadow-md);transform:translateY(-3px);}
         .gallery-item .img-wrap{
-            width:100%;aspect-ratio:1/1;overflow:hidden;
-            background:var(--color-surface-offset);
+            width:100%;aspect-ratio:1/1;overflow:hidden;background:var(--color-surface-offset);
         }
         .gallery-item .img-wrap img{
             width:100%;height:100%;object-fit:cover;object-position:center;
@@ -203,15 +194,13 @@
         .gallery-item:hover .img-wrap img{transform:scale(1.04);}
         .gallery-item figcaption{padding:0.9rem 1rem 1rem;}
         .gallery-item h4{
-            font-family:var(--font-display);font-size:var(--text-sm);
-            font-weight:700;margin-bottom:0.2rem;
-            white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+            font-family:var(--font-display);font-size:var(--text-sm);font-weight:700;
+            margin-bottom:0.2rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
         }
         .gallery-item p{
             font-size:var(--text-xs);color:var(--color-text-muted);
             white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
         }
-        /* show-more button per category */
         .show-more-wrap { text-align: center; margin-top: 1rem; }
         .btn-show-more {
             display: inline-flex; align-items: center; gap: 0.4rem;
@@ -219,8 +208,7 @@
             font-size: var(--text-sm); font-weight: 600; cursor: pointer;
             border: 1px solid color-mix(in srgb,var(--color-text) 14%,transparent);
             background: color-mix(in srgb,var(--color-surface) 84%,transparent);
-            color: var(--color-text-muted);
-            transition: all var(--transition);
+            color: var(--color-text-muted); transition: all var(--transition);
         }
         .btn-show-more:hover { background: var(--color-surface-offset); color: var(--color-text); }
 
@@ -246,6 +234,16 @@
         }
         .map-card{padding:1rem;}
         .map-card iframe{width:100%;height:320px;border:0;border-radius:1rem;}
+        .map-open-link{
+            display:inline-flex;align-items:center;gap:0.4rem;
+            margin-top:0.75rem;padding:0.5rem 1rem;
+            border-radius:9999px;font-size:var(--text-sm);font-weight:600;
+            color:var(--color-primary);
+            border:1px solid color-mix(in srgb,var(--color-primary) 30%,transparent);
+            background:color-mix(in srgb,var(--color-primary) 6%,transparent);
+            transition:background var(--transition);
+        }
+        .map-open-link:hover{background:color-mix(in srgb,var(--color-primary) 12%,transparent);}
         .footer{
             padding:2rem 0 2.5rem;
             border-top:1px solid color-mix(in srgb,var(--color-text) 8%,transparent);
@@ -305,7 +303,7 @@
             </nav>
             <div class="header-actions">
                 <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch color mode"></button>
-                <a class="btn btn-primary" id="whatsapp-top" href="#" target="_blank" rel="noopener noreferrer">WhatsApp now</a>
+                <a class="btn btn-primary" id="whatsapp-top" href="https://wa.me/919810366779?text=Hello%20M%20K%20Fabrics%2C%20I%20want%20to%20know%20more%20about%20your%20fabric%20collection." target="_blank" rel="noopener noreferrer">WhatsApp now</a>
                 <button class="menu-toggle" type="button" data-menu-toggle aria-controls="site-nav" aria-expanded="false" aria-label="Open menu">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h16M4 12h16M4 17h16" /></svg>
                 </button>
@@ -392,7 +390,23 @@
                     </ul>
                 </div>
                 <div class="map-card reveal">
-                    <iframe id="map-frame" title="M K Fabrics location map" loading="lazy" allowfullscreen referrerpolicy="no-referrer-when-downgrade" src=""></iframe>
+                    <!-- Hardcoded embed using exact shop coordinates from maps.app.goo.gl/aRBCEhAM661dmsro7 -->
+                    <iframe
+                        title="M K Fabrics location map"
+                        loading="lazy"
+                        allowfullscreen
+                        referrerpolicy="no-referrer-when-downgrade"
+                        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3507.0!2d77.2789!3d28.5062!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMjjCsDMwJzIyLjMiTiA3N8KwMTYnNDQuMCJF!5e0!3m2!1sen!2sin!4v1718707200000!5m2!1sen!2sin"
+                    ></iframe>
+                    <a
+                        class="map-open-link"
+                        href="https://maps.app.goo.gl/aRBCEhAM661dmsro7"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                    >
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7Z"/><circle cx="12" cy="9" r="2.5"/></svg>
+                        Open in Google Maps
+                    </a>
                 </div>
             </div>
         </section>
@@ -403,7 +417,7 @@
             <a href="/admin/">Admin login</a>
         </div>
     </footer>
-    <a class="whatsapp-float" id="whatsapp-float" href="#" target="_blank" rel="noopener noreferrer" aria-label="Chat on WhatsApp">
+    <a class="whatsapp-float" id="whatsapp-float" href="https://wa.me/919810366779?text=Hello%20M%20K%20Fabrics%2C%20I%20want%20to%20know%20more%20about%20your%20fabric%20collection." target="_blank" rel="noopener noreferrer" aria-label="Chat on WhatsApp">
         <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20.52 3.48A11.82 11.82 0 0 0 12.07 0C5.55 0 .25 5.3.25 11.82c0 2.08.54 4.11 1.57 5.91L0 24l6.45-1.69a11.8 11.8 0 0 0 5.62 1.43h.01c6.52 0 11.82-5.3 11.82-11.82 0-3.16-1.23-6.13-3.38-8.44Z" /></svg>
     </a>
     <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
@@ -412,7 +426,7 @@
         const OWNER = 'maheshs5612';
         const REPO  = 'm-k-fabrics-web';
 
-        // ── Contact ──────────────────────────────────────────
+        // ── Contact (loads text fields only, map is hardcoded) ──
         async function loadContact() {
             try {
                 const d = await fetch('./content/contact.json').then(r => r.json());
@@ -422,10 +436,6 @@
                 const wa = d.whatsapp || '#';
                 document.getElementById('whatsapp-top').href   = wa;
                 document.getElementById('whatsapp-float').href = wa;
-                if (d.address) {
-                    document.getElementById('map-frame').src =
-                        'https://www.google.com/maps?q=' + encodeURIComponent(d.address) + '&output=embed';
-                }
             } catch(e) {}
         }
 
@@ -445,28 +455,22 @@
 
         // ── Render one category section ──────────────────────
         function renderCategory(categoryName, items) {
-            const section  = document.createElement('div');
+            const section = document.createElement('div');
             section.className = 'gallery-section reveal';
-
             const header = document.createElement('div');
             header.className = 'gallery-category-header';
             header.innerHTML = `<h3>${categoryName}</h3>`;
             section.appendChild(header);
-
             const grid = document.createElement('div');
             grid.className = 'gallery-grid';
-
-            // show first ITEMS_PER_PAGE, hide rest
             items.forEach((item, i) => {
-                const card = document.createElement('div');
-                card.innerHTML = cardHTML(item);
-                const fig = card.firstElementChild;
+                const wrap = document.createElement('div');
+                wrap.innerHTML = cardHTML(item);
+                const fig = wrap.firstElementChild;
                 if (i >= ITEMS_PER_PAGE) fig.style.display = 'none';
                 grid.appendChild(fig);
             });
             section.appendChild(grid);
-
-            // show-more button if needed
             if (items.length > ITEMS_PER_PAGE) {
                 const wrap = document.createElement('div');
                 wrap.className = 'show-more-wrap';
@@ -480,7 +484,6 @@
                 wrap.appendChild(btn);
                 section.appendChild(wrap);
             }
-
             return section;
         }
 
@@ -493,49 +496,36 @@
                     `https://api.github.com/repos/${OWNER}/${REPO}/contents/content/gallery`,
                     { headers: { Accept: 'application/vnd.github+json' } }
                 ).then(r => r.json());
-
                 const jsonFiles = Array.isArray(files)
                     ? files.filter(f => f.name.endsWith('.json') && f.name !== 'index.json')
                     : [];
-
                 if (!jsonFiles.length) {
                     status.textContent = 'Gallery coming soon. Check back for updates.';
                     return;
                 }
-
                 const items = await Promise.all(
                     jsonFiles.map(f => fetch(f.download_url).then(r => r.json()))
                 );
-
-                // Group by category
                 const groups = {};
                 items.forEach(item => {
                     const cat = item.category || 'Other';
                     if (!groups[cat]) groups[cat] = [];
                     groups[cat].push(item);
                 });
-
-                // Defined display order
                 const ORDER = ['Rayon','Cambric','Poplin','Modal','Yarn Dyed','Cotton','Suiting','Shirting','Other'];
                 const sorted = [
                     ...ORDER.filter(c => groups[c]),
                     ...Object.keys(groups).filter(c => !ORDER.includes(c))
                 ];
-
-                sorted.forEach(cat => {
-                    root.appendChild(renderCategory(cat, groups[cat]));
-                });
-
-                // re-observe new .reveal elements
+                sorted.forEach(cat => root.appendChild(renderCategory(cat, groups[cat])));
                 document.querySelectorAll('.gallery-section.reveal').forEach(el => revealObserver.observe(el));
-
                 status.textContent = `${items.length} item${items.length !== 1 ? 's' : ''} across ${sorted.length} categor${sorted.length !== 1 ? 'ies' : 'y'}.`;
             } catch(e) {
                 status.textContent = 'Gallery coming soon. Check back for updates.';
             }
         }
 
-        // ── Reveal observer (shared) ─────────────────────────
+        // ── Reveal observer ──────────────────────────────────
         const revealObserver = new IntersectionObserver(
             entries => entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('is-visible'); }),
             { threshold: 0.1 }
