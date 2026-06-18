@@ -8,20 +8,17 @@ public_folder: "/uploads"
 collections:
   - name: "gallery"
     label: "Gallery"
-    files:
-      - label: "Gallery Items"
-        name: "gallery_items"
-        file: "content/gallery.json"
-        format: "json"
-        fields:
-          - label: "Items"
-            name: "items"
-            widget: "list"
-            summary: "{{fields.title}}"
-            fields:
-              - { label: "Title", name: "title", widget: "string" }
-              - { label: "Note", name: "note", widget: "text", required: false }
-              - { label: "Image", name: "image", widget: "image" }
+    folder: "content/gallery"
+    create: true
+    slug: "{{slug}}"
+    format: "json"
+    extension: "json"
+    label_singular: "Gallery Item"
+    summary: "{{title}}"
+    fields:
+      - { label: "Title", name: "title", widget: "string" }
+      - { label: "Note", name: "note", widget: "text", required: false }
+      - { label: "Image", name: "image", widget: "image" }
 
   - name: "site_settings"
     label: "Site Settings"
