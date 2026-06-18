@@ -25,3 +25,4 @@ This version is fully wired so the public website reads:
 ## Best use
 
 This setup is a good fit for around 50 to 100 images.
+ 
