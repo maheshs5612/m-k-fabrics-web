@@ -1,22 +1,17 @@
-// GitHub OAuth proxy for Decap CMS
-// GET /api/auth              → redirect to GitHub
-// GET /api/auth?code=...     → exchange code, post token back to CMS
-
 const CLIENT_ID     = process.env.OAUTH_CLIENT_ID;
 const CLIENT_SECRET = process.env.OAUTH_CLIENT_SECRET;
 const SCOPE         = 'repo,user';
+const REDIRECT_URI  = 'https://m-k-fabrics.vercel.app/api/auth';
 
 export default async function handler(req, res) {
   const { code } = req.query;
 
   if (!code) {
     // Step 1: redirect to GitHub
-    const host = req.headers.host;
-    const redirectUri = `https://${host}/api/auth?provider=github`;
     const params = new URLSearchParams({
       client_id: CLIENT_ID,
       scope: SCOPE,
-      redirect_uri: redirectUri,
+      redirect_uri: REDIRECT_URI,
     });
     return res.redirect(302, `https://github.com/login/oauth/authorize?${params}`);
   }
@@ -29,32 +24,36 @@ export default async function handler(req, res) {
       client_id: CLIENT_ID,
       client_secret: CLIENT_SECRET,
       code,
+      redirect_uri: REDIRECT_URI,
     }),
   });
   const data = await tokenRes.json();
 
   if (data.error) {
+    const content = `<!DOCTYPE html><html><body><script>
+(function(){
+  var msg = JSON.stringify({ token: '', provider: 'github', error: '${data.error}' });
+  if (window.opener) {
+    window.opener.postMessage('authorization:github:error:' + msg, '*');
+  }
+  window.close();
+})();
+<\/script></body></html>`;
     res.setHeader('Content-Type', 'text/html');
-    return res.send(`<!DOCTYPE html><html><body><script>
-      window.opener && window.opener.postMessage(
-        'authorization:github:error:' + JSON.stringify({message: ${JSON.stringify(data.error_description)}}),
-        '*'
-      );
-      window.close();
-    <\/script></body></html>`);
+    return res.send(content);
   }
 
-  // Step 3: post token back to CMS opener window
+  // Step 3: post token back — format Decap CMS v3 expects
   const token = data.access_token;
+  const content = `<!DOCTYPE html><html><body><script>
+(function(){
+  var data = JSON.stringify({ token: '${token}', provider: 'github' });
+  if (window.opener) {
+    window.opener.postMessage('authorization:github:success:' + data, '*');
+  }
+  window.close();
+})();
+<\/script></body></html>`;
   res.setHeader('Content-Type', 'text/html');
-  return res.send(`<!DOCTYPE html><html><body><script>
-    (function(){
-      const msg = 'authorization:github:success:' + JSON.stringify({
-        token: ${JSON.stringify(token)},
-        provider: 'github'
-      });
-      window.opener && window.opener.postMessage(msg, '*');
-      window.close();
-    })();
-  <\/script></body></html>`);
+  return res.send(content);
 }
