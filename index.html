@@ -390,7 +390,6 @@
                     </ul>
                 </div>
                 <div class="map-card reveal">
-                    <!-- Hardcoded embed using exact shop coordinates from maps.app.goo.gl/aRBCEhAM661dmsro7 -->
                     <iframe
                         title="M K Fabrics location map"
                         loading="lazy"
@@ -420,13 +419,11 @@
     <a class="whatsapp-float" id="whatsapp-float" href="https://wa.me/919810366779?text=Hello%20M%20K%20Fabrics%2C%20I%20want%20to%20know%20more%20about%20your%20fabric%20collection." target="_blank" rel="noopener noreferrer" aria-label="Chat on WhatsApp">
         <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20.52 3.48A11.82 11.82 0 0 0 12.07 0C5.55 0 .25 5.3.25 11.82c0 2.08.54 4.11 1.57 5.91L0 24l6.45-1.69a11.8 11.8 0 0 0 5.62 1.43h.01c6.52 0 11.82-5.3 11.82-11.82 0-3.16-1.23-6.13-3.38-8.44Z" /></svg>
     </a>
-    <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
     <script>
         const ITEMS_PER_PAGE = 8;
         const OWNER = 'maheshs5612';
         const REPO  = 'm-k-fabrics-web';
 
-        // ── Contact (loads text fields only, map is hardcoded) ──
         async function loadContact() {
             try {
                 const d = await fetch('./content/contact.json').then(r => r.json());
@@ -439,7 +436,6 @@
             } catch(e) {}
         }
 
-        // ── Gallery card HTML ────────────────────────────────
         function cardHTML(item) {
             return `
             <figure class="gallery-item">
@@ -453,7 +449,6 @@
             </figure>`;
         }
 
-        // ── Render one category section ──────────────────────
         function renderCategory(categoryName, items) {
             const section = document.createElement('div');
             section.className = 'gallery-section reveal';
@@ -487,7 +482,6 @@
             return section;
         }
 
-        // ── Load gallery via GitHub API ──────────────────────
         async function loadGallery() {
             const status = document.getElementById('gallery-status');
             const root   = document.getElementById('gallery-root');
@@ -525,7 +519,6 @@
             }
         }
 
-        // ── Reveal observer ──────────────────────────────────
         const revealObserver = new IntersectionObserver(
             entries => entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('is-visible'); }),
             { threshold: 0.1 }
@@ -535,7 +528,6 @@
         loadContact();
         loadGallery();
 
-        // ── Theme / nav ──────────────────────────────────────
         (function () {
             const root   = document.documentElement;
             const toggle = document.querySelector('[data-theme-toggle]');
@@ -558,11 +550,6 @@
                 nav.classList.remove('open');
                 menuToggle?.setAttribute('aria-expanded', 'false');
             }));
-            if (window.netlifyIdentity) {
-                window.netlifyIdentity.on('init', user => {
-                    if (!user) window.netlifyIdentity.on('login', () => { document.location.href = '/admin/'; });
-                });
-            }
         })();
     </script>
 </body>
