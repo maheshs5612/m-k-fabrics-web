@@ -1,5 +1,6 @@
 backend:
-  name: git-gateway
+  name: github
+  repo: maheshs5612/m-k-fabrics-web
   branch: main
 
 media_folder: "uploads"
