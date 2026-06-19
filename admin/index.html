@@ -5,7 +5,35 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="robots" content="noindex" />
   <title>M K Fabrics — Admin</title>
-  <script src="https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js"></script>
+  <style>
+    body { margin: 0; font-family: sans-serif; background: #f7f3ee; }
+    #loading {
+      display: flex; flex-direction: column; align-items: center;
+      justify-content: center; height: 100vh; gap: 1rem;
+      color: #7a3f1d; font-size: 1.1rem;
+    }
+    #loading::before {
+      content: '';
+      width: 40px; height: 40px;
+      border: 4px solid #d6c8b7;
+      border-top-color: #7a3f1d;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
 </head>
-<body></body>
+<body>
+  <div id="loading">Loading Admin...</div>
+  <script>
+    // Hide loader once CMS mounts
+    window.addEventListener('load', function() {
+      setTimeout(function() {
+        var el = document.getElementById('loading');
+        if (el) el.style.display = 'none';
+      }, 1500);
+    });
+  </script>
+  <script src="https://unpkg.com/decap-cms@3.3.3/dist/decap-cms.js"></script>
+</body>
 </html>
