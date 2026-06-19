@@ -2,8 +2,8 @@ backend:
   name: github
   repo: maheshs5612/m-k-fabrics-web
   branch: main
-  base_url: https://m-k-fabrics.vercel.app
-  auth_endpoint: /api/auth
+  base_url: https://api.netlify.com
+  auth_endpoint: auth
 
 media_folder: "uploads"
 public_folder: "/uploads"
