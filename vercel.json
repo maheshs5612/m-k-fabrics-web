@@ -1,7 +1,5 @@
 {
-  "functions": {
-    "api/auth.js": {
-      "runtime": "@vercel/node@5.1.9"
-    }
-  }
+  "rewrites": [
+    { "source": "/api/:path*", "destination": "/api/:path*" }
+  ]
 }
