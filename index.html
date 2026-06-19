@@ -37,6 +37,7 @@
             --content:1120px;
             --font-display:"Cabinet Grotesk","Inter",sans-serif;
             --font-body:"Satoshi","Inter",sans-serif;
+            --gold-1:#c8972a;--gold-2:#e8bb5a;--gold-3:#f5d98a;--gold-4:#a67520;
         }
         [data-theme="dark"] {
             --color-bg:#16120f;--color-surface:#1d1814;
@@ -48,6 +49,7 @@
             --shadow-sm:0 1px 2px rgba(0,0,0,0.22);
             --shadow-md:0 12px 30px rgba(0,0,0,0.28);
             --shadow-lg:0 20px 60px rgba(0,0,0,0.4);
+            --gold-1:#d4a030;--gold-2:#f0c860;--gold-3:#fce898;--gold-4:#b88228;
         }
         *{box-sizing:border-box;margin:0;padding:0;}
         html{scroll-behavior:smooth;scroll-padding-top:6rem;}
@@ -80,12 +82,25 @@
             border-bottom:1px solid color-mix(in srgb,var(--color-text) 8%,transparent);
         }
         .header-inner{display:flex;align-items:center;justify-content:space-between;min-height:5rem;gap:1rem;}
-        .brand{display:flex;align-items:center;gap:0.75rem;font-family:var(--font-display);font-weight:700;}
-        .brand-mark{
-            width:2.8rem;height:2.8rem;padding:0.45rem;border-radius:0.9rem;
-            color:var(--color-primary);
-            background:color-mix(in srgb,var(--color-primary) 10%,var(--color-surface));
-            border:1px solid color-mix(in srgb,var(--color-primary) 18%,transparent);
+        .brand{display:flex;align-items:center;gap:0.6rem;text-decoration:none;}
+        .brand-logo{height:3rem;width:auto;display:block;flex-shrink:0;}
+        .brand-text{display:flex;flex-direction:column;line-height:1.15;}
+        .brand-text strong{
+            font-family:var(--font-display);
+            font-size:1.05rem;
+            font-weight:800;
+            letter-spacing:0.1em;
+            text-transform:uppercase;
+            background:linear-gradient(135deg,var(--gold-4) 0%,var(--gold-2) 40%,var(--gold-3) 65%,var(--gold-1) 100%);
+            -webkit-background-clip:text;
+            -webkit-text-fill-color:transparent;
+            background-clip:text;
+        }
+        .brand-text span{
+            font-size:0.58rem;
+            letter-spacing:0.2em;
+            text-transform:uppercase;
+            color:var(--color-text-faint);
         }
         nav ul{list-style:none;display:flex;gap:1.25rem;}
         .header-actions{display:flex;align-items:center;gap:0.75rem;}
@@ -159,24 +174,11 @@
         }
         .section-head h2,.story-copy h2{font-family:var(--font-display);font-size:var(--text-2xl);line-height:1;}
         .grid-3{display:grid;gap:1.25rem;grid-template-columns:repeat(3,1fr);}
-
-        /* ── Gallery ── */
-        .gallery-section { margin-bottom: 3rem; }
-        .gallery-category-header {
-            display: flex; align-items: center; gap: 1rem; margin-bottom: 1.25rem;
-        }
-        .gallery-category-header h3 {
-            font-family: var(--font-display); font-size: var(--text-lg);
-            font-weight: 700; white-space: nowrap;
-        }
-        .gallery-category-header::after {
-            content: ''; flex: 1; height: 1px; background: var(--color-divider);
-        }
-        .gallery-grid{
-            display:grid;
-            grid-template-columns:repeat(auto-fill,minmax(220px,1fr));
-            gap:1.25rem;
-        }
+        .gallery-section{margin-bottom:3rem;}
+        .gallery-category-header{display:flex;align-items:center;gap:1rem;margin-bottom:1.25rem;}
+        .gallery-category-header h3{font-family:var(--font-display);font-size:var(--text-lg);font-weight:700;white-space:nowrap;}
+        .gallery-category-header::after{content:'';flex:1;height:1px;background:var(--color-divider);}
+        .gallery-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:1.25rem;}
         .gallery-item{
             background:color-mix(in srgb,var(--color-surface) 94%,transparent);
             border:1px solid color-mix(in srgb,var(--color-text) 10%,transparent);
@@ -184,34 +186,22 @@
             transition:box-shadow var(--transition),transform var(--transition);
         }
         .gallery-item:hover{box-shadow:var(--shadow-md);transform:translateY(-3px);}
-        .gallery-item .img-wrap{
-            width:100%;aspect-ratio:1/1;overflow:hidden;background:var(--color-surface-offset);
-        }
-        .gallery-item .img-wrap img{
-            width:100%;height:100%;object-fit:cover;object-position:center;
-            transition:transform 0.4s ease;
-        }
+        .gallery-item .img-wrap{width:100%;aspect-ratio:1/1;overflow:hidden;background:var(--color-surface-offset);}
+        .gallery-item .img-wrap img{width:100%;height:100%;object-fit:cover;object-position:center;transition:transform 0.4s ease;}
         .gallery-item:hover .img-wrap img{transform:scale(1.04);}
         .gallery-item figcaption{padding:0.9rem 1rem 1rem;}
-        .gallery-item h4{
-            font-family:var(--font-display);font-size:var(--text-sm);font-weight:700;
-            margin-bottom:0.2rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+        .gallery-item h4{font-family:var(--font-display);font-size:var(--text-sm);font-weight:700;margin-bottom:0.2rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+        .gallery-item p{font-size:var(--text-xs);color:var(--color-text-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+        .show-more-wrap{text-align:center;margin-top:1rem;}
+        .btn-show-more{
+            display:inline-flex;align-items:center;gap:0.4rem;
+            padding:0.55rem 1.2rem;border-radius:9999px;
+            font-size:var(--text-sm);font-weight:600;cursor:pointer;
+            border:1px solid color-mix(in srgb,var(--color-text) 14%,transparent);
+            background:color-mix(in srgb,var(--color-surface) 84%,transparent);
+            color:var(--color-text-muted);transition:all var(--transition);
         }
-        .gallery-item p{
-            font-size:var(--text-xs);color:var(--color-text-muted);
-            white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
-        }
-        .show-more-wrap { text-align: center; margin-top: 1rem; }
-        .btn-show-more {
-            display: inline-flex; align-items: center; gap: 0.4rem;
-            padding: 0.55rem 1.2rem; border-radius: 9999px;
-            font-size: var(--text-sm); font-weight: 600; cursor: pointer;
-            border: 1px solid color-mix(in srgb,var(--color-text) 14%,transparent);
-            background: color-mix(in srgb,var(--color-surface) 84%,transparent);
-            color: var(--color-text-muted); transition: all var(--transition);
-        }
-        .btn-show-more:hover { background: var(--color-surface-offset); color: var(--color-text); }
-
+        .btn-show-more:hover{background:var(--color-surface-offset);color:var(--color-text);}
         .card,.map-card{
             background:color-mix(in srgb,var(--color-surface) 94%,transparent);
             border:1px solid color-mix(in srgb,var(--color-text) 10%,transparent);
@@ -228,10 +218,7 @@
         .card p{font-size:var(--text-sm);color:var(--color-text-muted);}
         .contact-list{list-style:none;display:grid;gap:1rem;margin-top:1.25rem;}
         .contact-list li{padding-bottom:1rem;border-bottom:1px solid var(--color-divider);}
-        .contact-label{
-            display:block;color:var(--color-text-faint);font-size:var(--text-xs);
-            text-transform:uppercase;letter-spacing:0.08em;margin-bottom:0.25rem;
-        }
+        .contact-label{display:block;color:var(--color-text-faint);font-size:var(--text-xs);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:0.25rem;}
         .map-card{padding:1rem;}
         .map-card iframe{width:100%;height:320px;border:0;border-radius:1rem;}
         .map-open-link{
@@ -244,14 +231,8 @@
             transition:background var(--transition);
         }
         .map-open-link:hover{background:color-mix(in srgb,var(--color-primary) 12%,transparent);}
-        .footer{
-            padding:2rem 0 2.5rem;
-            border-top:1px solid color-mix(in srgb,var(--color-text) 8%,transparent);
-        }
-        .footer-inner{
-            display:flex;align-items:center;justify-content:space-between;
-            gap:1rem;color:var(--color-text-muted);font-size:var(--text-sm);
-        }
+        .footer{padding:2rem 0 2.5rem;border-top:1px solid color-mix(in srgb,var(--color-text) 8%,transparent);}
+        .footer-inner{display:flex;align-items:center;justify-content:space-between;gap:1rem;color:var(--color-text-muted);font-size:var(--text-sm);}
         .whatsapp-float{
             position:fixed;right:1rem;bottom:1rem;
             width:58px;height:58px;border-radius:50%;
@@ -286,12 +267,48 @@
     <header class="header">
         <div class="container header-inner">
             <a class="brand" href="#home" aria-label="M K Fabrics home">
-                <svg class="brand-mark" viewBox="0 0 64 64" fill="none" aria-hidden="true">
-                    <path d="M12 47V17l12 15 8-10 20 25" stroke="currentColor" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" />
-                    <path d="M12 47h40" stroke="currentColor" stroke-width="5" stroke-linecap="round" />
-                    <path d="M44 18c3.5 0 6 2.5 6 6 0 3-2.5 5.5-6 5.5-3 0-5.5-2.5-5.5-5.5 0-3.5 2.5-6 5.5-6Z" stroke="currentColor" stroke-width="4" />
+                <svg class="brand-logo" viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <defs>
+                        <linearGradient id="gA" x1="0" y1="0" x2="1" y2="1">
+                            <stop offset="0%" stop-color="#a67520"/>
+                            <stop offset="35%" stop-color="#e8bb5a"/>
+                            <stop offset="65%" stop-color="#f5d98a"/>
+                            <stop offset="100%" stop-color="#c8972a"/>
+                        </linearGradient>
+                        <linearGradient id="gB" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stop-color="#f0c860"/>
+                            <stop offset="100%" stop-color="#a67520"/>
+                        </linearGradient>
+                    </defs>
+                    <!-- Jacket body -->
+                    <path d="M11 55 L11 27 L20 17 L24 24 L30 19 L36 24 L40 17 L49 27 L49 55 Z" fill="url(#gA)"/>
+                    <!-- Lapels -->
+                    <path d="M20 17 L24 24 L30 19" fill="none" stroke="#c8972a" stroke-width="1.3" stroke-linejoin="round"/>
+                    <path d="M40 17 L36 24 L30 19" fill="none" stroke="#c8972a" stroke-width="1.3" stroke-linejoin="round"/>
+                    <!-- Center placket -->
+                    <line x1="30" y1="19" x2="30" y2="55" stroke="#a67520" stroke-width="1" stroke-dasharray="2.5 2"/>
+                    <!-- Buttons -->
+                    <circle cx="30" cy="28" r="1.4" fill="#7a5010"/>
+                    <circle cx="30" cy="35" r="1.4" fill="#7a5010"/>
+                    <circle cx="30" cy="42" r="1.4" fill="#7a5010"/>
+                    <!-- Left sleeve -->
+                    <path d="M11 27 L4 37 L9 39 L11 31" fill="url(#gB)" stroke="#a67520" stroke-width="0.6"/>
+                    <!-- Right sleeve -->
+                    <path d="M49 27 L56 37 L51 39 L49 31" fill="url(#gB)" stroke="#a67520" stroke-width="0.6"/>
+                    <!-- Left chest pocket -->
+                    <rect x="14" y="30" width="7" height="5.5" rx="1.2" fill="none" stroke="#d4a030" stroke-width="0.9"/>
+                    <!-- Right chest pocket -->
+                    <rect x="39" y="30" width="7" height="5.5" rx="1.2" fill="none" stroke="#d4a030" stroke-width="0.9"/>
+                    <!-- Shoulder seams -->
+                    <line x1="11" y1="27" x2="20" y2="21" stroke="#d4a030" stroke-width="0.8"/>
+                    <line x1="49" y1="27" x2="40" y2="21" stroke="#d4a030" stroke-width="0.8"/>
+                    <!-- Hem line -->
+                    <line x1="11" y1="55" x2="49" y2="55" stroke="#a67520" stroke-width="1"/>
                 </svg>
-                <span>M K Fabrics</span>
+                <div class="brand-text">
+                    <strong>M K Fabrics</strong>
+                    <span>Premium Textiles</span>
+                </div>
             </a>
             <nav id="site-nav" aria-label="Primary navigation">
                 <ul>
