@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="robots" content="noindex" />
   <title>M K Fabrics — Admin</title>
+  <link rel="cms-config-url" type="text/yaml" href="/admin/config.yml" />
   <style>
     body { margin: 0; font-family: sans-serif; background: #f7f3ee; }
     #loading {
@@ -26,7 +27,6 @@
 <body>
   <div id="loading">Loading Admin...</div>
   <script>
-    // Hide loader once CMS mounts
     window.addEventListener('load', function() {
       setTimeout(function() {
         var el = document.getElementById('loading');
