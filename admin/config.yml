@@ -32,6 +32,7 @@ collections:
           - { label: "Modal", value: "Modal" }
           - { label: "Yarn Dyed", value: "Yarn Dyed" }
           - { label: "Cotton", value: "Cotton" }
+          - { label: "Cotton Voile", value: "Cotton Voile" }
           - { label: "Suiting", value: "Suiting" }
           - { label: "Shirting", value: "Shirting" }
           - { label: "Other", value: "Other" }
