@@ -514,7 +514,7 @@
                     if (!groups[cat]) groups[cat] = [];
                     groups[cat].push(item);
                 });
-                const ORDER = ['Rayon','Cambric','Poplin','Modal','Yarn Dyed','Cotton','Suiting','Shirting','Other'];
+                const ORDER = ['Rayon','Cambric','Poplin','Modal','Yarn Dyed','Cotton','Cotton Voile','Suiting','Shirting','Other'];
                 const sorted = [
                     ...ORDER.filter(c => groups[c]),
                     ...Object.keys(groups).filter(c => !ORDER.includes(c))
