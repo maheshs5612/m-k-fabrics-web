@@ -1,28 +1,46 @@
-# M K Fabrics CMS Final
+# M K Fabrics
 
-This version is fully wired so the public website reads:
-- `content/gallery.json` for gallery items
-- `content/contact.json` for contact details
+Premium fabric showcase website with a CMS-powered gallery, hosted on **Vercel**.
 
-## Publish flow
+## Tech stack
 
-1. Put this folder in a GitHub repository.
-2. Connect the repository to Netlify.
-3. Enable Netlify Identity.
-4. Set registration to **Invite only**.
-5. Enable **Git Gateway**.
-6. Visit `/admin/` and log in from your invite email.
-7. Update gallery items or contact details.
-8. Publish changes from the CMS.
+- **Frontend** — plain HTML/CSS/JS (`index.html`)
+- **CMS** — [Decap CMS](https://decapcms.org/) at `/admin/`
+- **Auth** — GitHub OAuth via Vercel serverless function (`api/auth/[...auth].js`)
+- **Hosting** — Vercel (`vercel.json`)
 
-## How it works
+## Structure
 
-- Decap CMS edits the JSON files.
-- The public website fetches those JSON files directly.
-- Uploaded images go into `uploads/`.
-- Visitors can see the gallery, but only invited admins can edit it.
+```
+├── index.html              # Public website
+├── vercel.json             # Vercel routing config
+├── admin/
+│   ├── index.html          # Decap CMS entry point
+│   └── config.yml          # CMS collections & field definitions
+├── api/
+│   └── auth/
+│       └── [...auth].js    # GitHub OAuth handler (login + callback)
+├── content/
+│   ├── contact.json        # Contact details (edited via CMS)
+│   └── gallery/            # One JSON file per gallery item (managed by CMS)
+└── uploads/                # Uploaded fabric images
+```
 
-## Best use
+## Adding gallery items
 
-This setup is a good fit for around 50 to 100 images.
- 
+1. Go to `/admin/` and log in with your GitHub account.
+2. Click **Gallery → New Gallery Item**.
+3. Fill in Title, Category, optional Note, and upload an Image.
+4. Save and publish — the item appears on the site immediately.
+
+## Environment variables (Vercel)
+
+| Variable | Description |
+|---|---|
+| `OAUTH_CLIENT_ID` | GitHub OAuth App client ID |
+| `OAUTH_CLIENT_SECRET` | GitHub OAuth App client secret |
+
+## Notes
+
+- Gallery images are stored in `uploads/` and committed to the repo.
+- This setup comfortably handles ~50–100 images.
