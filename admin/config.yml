@@ -35,6 +35,7 @@ collections:
           - { label: "Cotton Voile", value: "Cotton Voile" }
           - { label: "Suiting", value: "Suiting" }
           - { label: "Shirting", value: "Shirting" }
+          - { label: "Embroidery", value: "Embroidery" }
           - { label: "Other", value: "Other" }
         default: "Other"
       - { label: "Note", name: "note", widget: "text", required: false }
