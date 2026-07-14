@@ -185,11 +185,32 @@
             border:1px solid color-mix(in srgb,var(--color-text) 10%,transparent);
             border-radius:1.25rem;overflow:hidden;box-shadow:var(--shadow-sm);
             transition:box-shadow var(--transition),transform var(--transition);
+            cursor:pointer;
         }
         .gallery-item:hover{box-shadow:var(--shadow-md);transform:translateY(-3px);}
-        .gallery-item .img-wrap{width:100%;aspect-ratio:1/1;overflow:hidden;background:var(--color-surface-offset);}
-        .gallery-item .img-wrap img{width:100%;height:100%;object-fit:cover;object-position:center;transition:transform 0.4s ease;}
+        .gallery-item .img-wrap{width:100%;aspect-ratio:1/1;overflow:hidden;background:var(--color-surface-offset);position:relative;}
+        .gallery-item .img-wrap img{width:100%;height:100%;object-fit:cover;object-position:center;transition:opacity 0.4s ease,transform 0.4s ease;}
         .gallery-item:hover .img-wrap img{transform:scale(1.04);}
+
+        /* dual-image flip on hover — fabric <-> model */
+        .gallery-item .img-model{
+            position:absolute;inset:0;width:100%;height:100%;
+            object-fit:cover;object-position:top;
+            opacity:0;transition:opacity 0.45s ease;
+        }
+        .gallery-item:hover .img-model{opacity:1;}
+        .gallery-item:hover .img-wrap .img-fabric{opacity:0;}
+        .model-badge{
+            position:absolute;bottom:0.5rem;right:0.5rem;
+            background:color-mix(in srgb,var(--color-primary) 90%,black);
+            color:var(--color-text-inverse);
+            font-size:0.6rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;
+            padding:0.25rem 0.5rem;border-radius:9999px;
+            opacity:0;transition:opacity 0.3s ease;
+            pointer-events:none;
+        }
+        .gallery-item:hover .model-badge{opacity:1;}
+
         .gallery-item figcaption{padding:0.9rem 1rem 1rem;}
         .gallery-item h4{font-family:var(--font-display);font-size:var(--text-sm);font-weight:700;margin-bottom:0.2rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
         .gallery-item p{font-size:var(--text-xs);color:var(--color-text-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
@@ -242,7 +263,7 @@
         .reveal{opacity:0;transform:translateY(20px);transition:opacity 0.6s ease,transform 0.6s ease;}
         .reveal.is-visible{opacity:1;transform:none;}
 
-        /* ── FABRIC SHOWCASE SLIDER ──────────────────────────────────────── */
+        /* ── FABRIC SHOWCASE SLIDER ────────────────────────────────────── */
         .showcase{
             padding:clamp(var(--space-12),8vw,var(--space-20)) 0;
             background:var(--color-surface);
@@ -273,121 +294,144 @@
             color:var(--color-text-inverse);
             border-color:var(--color-primary);
         }
+
+        /* ── DUAL-PANEL SHOWCASE STAGE ─────────────────────────────────── */
         .showcase-stage{
             position:relative;
             border-radius:1.75rem;
             overflow:hidden;
-            background:var(--color-surface-offset);
             border:1px solid color-mix(in srgb,var(--color-text) 10%,transparent);
             box-shadow:var(--shadow-lg);
-        }
-        .slide{
-            display:none;
-            grid-template-columns:1fr 1fr;
-            min-height:520px;
-        }
-        .slide.active{display:grid;}
-        .slide-images{
-            position:relative;
-            overflow:hidden;
-            background:#e8e4df;
-        }
-        /* Thumbnail strip on left like reference site */
-        .slide-thumb-strip{
-            position:absolute;left:1rem;top:50%;transform:translateY(-50%);
-            display:flex;flex-direction:column;gap:0.5rem;z-index:4;
-        }
-        .slide-thumb{
-            width:64px;height:64px;border-radius:0.75rem;overflow:hidden;
-            border:2px solid transparent;cursor:pointer;
-            transition:border-color var(--transition),opacity var(--transition);
-            opacity:0.65;
             background:var(--color-surface-offset);
         }
-        .slide-thumb.active{border-color:var(--color-primary);opacity:1;}
-        .slide-thumb img{width:100%;height:100%;object-fit:cover;}
-        /* Main image area */
-        .slide-main-img{
-            position:absolute;inset:0;
-            display:flex;align-items:center;justify-content:center;
+        .slide{display:none;grid-template-columns:1fr 1fr;min-height:520px;}
+        .slide.active{display:grid;}
+
+        /* Left panel: fabric close-up auto-cycling */
+        .slide-fabric-panel{
+            position:relative;overflow:hidden;background:#e8e4df;
         }
-        .slide-main-img img{
-            width:100%;height:100%;object-fit:cover;
-            transition:opacity 0.3s ease;
+        .fabric-img{
+            position:absolute;inset:0;width:100%;height:100%;
+            object-fit:cover;object-position:center;
+            opacity:0;transition:opacity 0.7s ease;
         }
-        /* Right: info panel */
-        .slide-info{
-            padding:clamp(2rem,4vw,3.5rem);
-            display:flex;flex-direction:column;justify-content:center;
-            background:var(--color-surface);
+        .fabric-img.active{opacity:1;}
+        .panel-label{
+            position:absolute;top:1rem;left:1rem;
+            background:color-mix(in srgb,black 55%,transparent);
+            backdrop-filter:blur(8px);
+            color:#fff;font-size:0.65rem;font-weight:700;
+            letter-spacing:0.12em;text-transform:uppercase;
+            padding:0.3rem 0.7rem;border-radius:9999px;z-index:3;
         }
-        .slide-cat-badge{
-            display:inline-flex;align-items:center;gap:0.4rem;
-            padding:0.35rem 0.85rem;
-            border-radius:9999px;
-            font-size:var(--text-xs);font-weight:700;
-            letter-spacing:0.1em;text-transform:uppercase;
-            background:color-mix(in srgb,var(--color-primary) 10%,var(--color-surface));
-            color:var(--color-primary);
-            border:1px solid color-mix(in srgb,var(--color-primary) 20%,transparent);
-            width:fit-content;margin-bottom:1.25rem;
+
+        /* Right panel: model wearing it */
+        .slide-model-panel{
+            position:relative;overflow:hidden;background:#f0ece6;
         }
-        .slide-info h3{
-            font-family:var(--font-display);
-            font-size:var(--text-xl);
-            line-height:1.1;
-            margin-bottom:1rem;
+        .model-img{
+            position:absolute;inset:0;width:100%;height:100%;
+            object-fit:cover;object-position:top center;
+            opacity:0;transition:opacity 0.7s ease;
         }
-        .slide-info .desc{
-            color:var(--color-text-muted);
-            font-size:var(--text-sm);
-            line-height:1.7;
-            margin-bottom:1.5rem;
-            max-width:38ch;
+        .model-img.active{opacity:1;}
+
+        /* Progress bar on bottom */
+        .slide-progress{
+            position:absolute;bottom:0;left:0;right:0;height:3px;
+            background:color-mix(in srgb,var(--color-text) 12%,transparent);
+            z-index:5;
         }
-        .slide-attrs{
-            display:grid;grid-template-columns:1fr 1fr;
-            gap:0.75rem;margin-bottom:2rem;
+        .slide-progress-fill{
+            height:100%;background:var(--color-primary);
+            width:0%;transition:width linear;
         }
-        .slide-attr{
-            padding:0.75rem 1rem;
-            background:var(--color-surface-2);
-            border-radius:0.75rem;
-            border:1px solid var(--color-divider);
-        }
-        .slide-attr-label{
-            font-size:var(--text-xs);color:var(--color-text-faint);
-            text-transform:uppercase;letter-spacing:0.08em;margin-bottom:0.2rem;
-        }
-        .slide-attr-val{font-size:var(--text-sm);font-weight:600;}
-        .slide-actions{display:flex;gap:0.75rem;flex-wrap:wrap;}
-        .slide-nav{
-            position:absolute;bottom:1.5rem;left:50%;transform:translateX(-50%);
-            display:flex;gap:0.4rem;z-index:5;
+
+        /* Slide counter + nav arrows in fabric panel */
+        .slide-counter{
+            position:absolute;bottom:1rem;left:50%;transform:translateX(-50%);
+            display:flex;gap:0.35rem;z-index:4;
         }
         .slide-dot{
-            width:8px;height:8px;border-radius:50%;
-            background:color-mix(in srgb,var(--color-text) 20%,transparent);
+            width:7px;height:7px;border-radius:50%;
+            background:color-mix(in srgb,white 40%,transparent);
             border:none;cursor:pointer;padding:0;
             transition:background var(--transition),transform var(--transition);
         }
-        .slide-dot.active{
-            background:var(--color-primary);
-            transform:scale(1.35);
-        }
+        .slide-dot.active{background:#fff;transform:scale(1.4);}
+
+        /* Slide arrows */
         .slide-arr{
             position:absolute;top:50%;
-            width:44px;height:44px;border-radius:50%;
-            background:color-mix(in srgb,var(--color-surface) 88%,transparent);
-            backdrop-filter:blur(8px);
+            width:40px;height:40px;border-radius:50%;
+            background:color-mix(in srgb,white 70%,transparent);
+            backdrop-filter:blur(6px);
             border:1px solid color-mix(in srgb,var(--color-text) 10%,transparent);
             display:grid;place-items:center;cursor:pointer;z-index:5;
             transform:translateY(-50%);
             transition:background var(--transition),box-shadow var(--transition);
+            color:var(--color-text);
         }
-        .slide-arr:hover{background:var(--color-surface);box-shadow:var(--shadow-md);}
-        .slide-arr.prev{left:5.5rem;}
-        .slide-arr.next{right:1rem;}
+        .slide-arr:hover{background:white;box-shadow:var(--shadow-md);}
+        .slide-arr.prev{left:0.75rem;}
+        .slide-arr.next{right:0.75rem;}
+
+        /* Right panel: info overlay at bottom */
+        .slide-info-overlay{
+            position:absolute;bottom:0;left:0;right:0;
+            padding:1.5rem 1.75rem;
+            background:linear-gradient(to top,color-mix(in srgb,var(--color-bg) 95%,transparent) 0%,transparent 100%);
+        }
+        .slide-cat-badge{
+            display:inline-flex;align-items:center;gap:0.35rem;
+            padding:0.3rem 0.75rem;
+            border-radius:9999px;
+            font-size:var(--text-xs);font-weight:700;
+            letter-spacing:0.1em;text-transform:uppercase;
+            background:color-mix(in srgb,var(--color-primary) 12%,var(--color-surface));
+            color:var(--color-primary);
+            border:1px solid color-mix(in srgb,var(--color-primary) 22%,transparent);
+            margin-bottom:0.6rem;
+        }
+        .slide-info-overlay h3{
+            font-family:var(--font-display);
+            font-size:var(--text-lg);line-height:1.1;margin-bottom:0.35rem;
+        }
+        .slide-info-overlay .desc{
+            color:var(--color-text-muted);font-size:var(--text-sm);
+            line-height:1.55;margin-bottom:1rem;max-width:36ch;
+        }
+        .slide-attrs{
+            display:grid;grid-template-columns:1fr 1fr;
+            gap:0.5rem;margin-bottom:1rem;
+        }
+        .slide-attr{
+            padding:0.6rem 0.8rem;
+            background:color-mix(in srgb,var(--color-surface) 90%,transparent);
+            backdrop-filter:blur(4px);
+            border-radius:0.65rem;
+            border:1px solid var(--color-divider);
+        }
+        .slide-attr-label{font-size:0.6rem;color:var(--color-text-faint);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:0.15rem;}
+        .slide-attr-val{font-size:var(--text-xs);font-weight:600;}
+        .slide-actions{display:flex;gap:0.6rem;flex-wrap:wrap;}
+
+        /* Auto-play toggle */
+        .autoplay-toggle{
+            display:inline-flex;align-items:center;gap:0.4rem;
+            padding:0.4rem 0.9rem;border-radius:9999px;
+            font-size:var(--text-xs);font-weight:600;cursor:pointer;
+            border:1px solid color-mix(in srgb,var(--color-text) 14%,transparent);
+            background:color-mix(in srgb,var(--color-surface) 90%,transparent);
+            color:var(--color-text-muted);transition:all var(--transition);
+            margin-left:auto;
+        }
+        .autoplay-toggle:hover{background:var(--color-surface-offset);}
+        .autoplay-toggle.playing .pause-icon{display:block;}
+        .autoplay-toggle.playing .play-icon{display:none;}
+        .autoplay-toggle:not(.playing) .pause-icon{display:none;}
+        .autoplay-toggle:not(.playing) .play-icon{display:block;}
 
         @media(max-width:960px){
             .hero-grid,.contact-grid,.story-grid,.grid-3,.hero-facts{grid-template-columns:1fr;}
@@ -406,15 +450,15 @@
             .header-actions .btn-primary{display:none;}
             .gallery-grid{grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:0.9rem;}
             .slide{grid-template-columns:1fr;min-height:auto;}
-            .slide-images{min-height:320px;}
-            .slide-arr.prev{left:4rem;}
-            .slide-thumb-strip{display:none;}
+            .slide-fabric-panel{min-height:280px;}
+            .slide-model-panel{min-height:340px;}
             .showcase-head{flex-direction:column;align-items:flex-start;}
             .showcase-head p{text-align:left;}
         }
         @media(prefers-reduced-motion:reduce){
             html{scroll-behavior:auto;}
             .reveal{opacity:1;transform:none;transition:none;}
+            .fabric-img,.model-img{transition:none;}
         }
     </style>
 </head>
@@ -472,6 +516,7 @@
             </div>
         </div>
     </header>
+
     <main>
         <section class="hero" id="home">
             <div class="container hero-grid">
@@ -486,570 +531,4 @@
                     <div class="hero-facts">
                         <div><strong>30+ Years</strong><span>Trusted wholesale supplier since the 1990s.</span></div>
                         <div><strong>All Designs</strong><span>Extensive range across all fabric types and occasions.</span></div>
-                        <div><strong>PAN-India Delivery</strong><span>Bulk orders shipped across India.</span></div>
-                    </div>
-                </div>
-                <div class="hero-visual reveal" aria-hidden="true">
-                    <div class="loom-lines"></div>
-                    <div class="swatch-card">
-                        <h2 style="font-family:var(--font-display);font-size:var(--text-lg)">Our Swatches</h2>
-                        <div class="swatches"><span></span><span></span><span></span><span></span></div>
-                        <p style="color:var(--color-text-muted);font-size:var(--text-sm)">Browse our fabric range and enquire for bulk pricing.</p>
-                    </div>
-                    <div class="fabric-wave"></div>
-                </div>
-            </div>
-        </section>
-
-        <!-- ── FABRIC SHOWCASE SLIDER ──────────────────────────────────── -->
-        <section class="showcase" id="showcase">
-            <div class="container">
-                <div class="showcase-head reveal">
-                    <div>
-                        <span class="eyebrow">Fabric in Motion</span>
-                        <h2>See how it wears</h2>
-                    </div>
-                    <p>Each fabric crafted for garments — from everyday wear to occasion dressing.</p>
-                </div>
-
-                <!-- Category tabs -->
-                <div class="showcase-tabs" role="tablist" aria-label="Fabric categories">
-                    <button class="tab-btn active" role="tab" aria-selected="true" data-cat="shirting">Shirting</button>
-                    <button class="tab-btn" role="tab" aria-selected="false" data-cat="suiting">Suiting</button>
-                    <button class="tab-btn" role="tab" aria-selected="false" data-cat="cotton">Cotton</button>
-                    <button class="tab-btn" role="tab" aria-selected="false" data-cat="rayon">Rayon</button>
-                    <button class="tab-btn" role="tab" aria-selected="false" data-cat="poplin">Poplin</button>
-                    <button class="tab-btn" role="tab" aria-selected="false" data-cat="yarndyed">Yarn Dyed</button>
-                </div>
-
-                <!-- Slider stage -->
-                <div class="showcase-stage reveal" id="showcase-stage">
-
-                    <!-- SHIRTING -->
-                    <div class="slide active" id="slide-shirting" role="tabpanel">
-                        <div class="slide-images">
-                            <div class="slide-thumb-strip" id="thumbs-shirting"></div>
-                            <div class="slide-main-img" id="main-shirting">
-                                <img src="https://images.unsplash.com/photo-1594938298603-c8148c4b4f26?w=800&q=80" alt="Model wearing shirting fabric shirt" width="800" height="520" loading="lazy" />
-                            </div>
-                            <button class="slide-arr prev" aria-label="Previous image" data-dir="-1" data-target="shirting">
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M15 18l-6-6 6-6"/></svg>
-                            </button>
-                            <button class="slide-arr next" aria-label="Next image" data-dir="1" data-target="shirting">
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M9 18l6-6-6-6"/></svg>
-                            </button>
-                        </div>
-                        <div class="slide-info">
-                            <span class="slide-cat-badge">
-                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg>
-                                Shirting
-                            </span>
-                            <h3>Premium Shirting Fabric</h3>
-                            <p class="desc">Crisp, breathable shirting cloth ideal for formal and casual shirts. Available in plains, checks, stripes, and prints — perfect for tailors and garment manufacturers.</p>
-                            <div class="slide-attrs">
-                                <div class="slide-attr"><div class="slide-attr-label">Composition</div><div class="slide-attr-val">100% Cotton / Blends</div></div>
-                                <div class="slide-attr"><div class="slide-attr-label">Width</div><div class="slide-attr-val">58" / 60"</div></div>
-                                <div class="slide-attr"><div class="slide-attr-label">MOQ</div><div class="slide-attr-val">50 metres</div></div>
-                                <div class="slide-attr"><div class="slide-attr-label">Finish</div><div class="slide-attr-val">Wrinkle-resistant</div></div>
-                            </div>
-                            <div class="slide-actions">
-                                <a class="btn btn-primary" href="https://wa.me/919810366779?text=I'm%20interested%20in%20Shirting%20fabric%20wholesale%20pricing." target="_blank" rel="noopener noreferrer">Enquire on WhatsApp</a>
-                                <a class="btn btn-secondary" href="#gallery">View gallery</a>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- SUITING -->
-                    <div class="slide" id="slide-suiting" role="tabpanel">
-                        <div class="slide-images">
-                            <div class="slide-thumb-strip" id="thumbs-suiting"></div>
-                            <div class="slide-main-img" id="main-suiting">
-                                <img src="https://images.unsplash.com/photo-1507679799987-c73779587ccf?w=800&q=80" alt="Model wearing suiting fabric suit" width="800" height="520" loading="lazy" />
-                            </div>
-                            <button class="slide-arr prev" aria-label="Previous image" data-dir="-1" data-target="suiting">
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M15 18l-6-6 6-6"/></svg>
-                            </button>
-                            <button class="slide-arr next" aria-label="Next image" data-dir="1" data-target="suiting">
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M9 18l6-6-6-6"/></svg>
-                            </button>
-                        </div>
-                        <div class="slide-info">
-                            <span class="slide-cat-badge">
-                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg>
-                                Suiting
-                            </span>
-                            <h3>Premium Suiting Fabric</h3>
-                            <p class="desc">Structured, drape-perfect suiting cloth for blazers, trousers, and formal wear. Rich texture and excellent hand-feel for high-end garment work.</p>
-                            <div class="slide-attrs">
-                                <div class="slide-attr"><div class="slide-attr-label">Composition</div><div class="slide-attr-val">Poly-viscose / Wool blends</div></div>
-                                <div class="slide-attr"><div class="slide-attr-label">Width</div><div class="slide-attr-val">58" / 60"</div></div>
-                                <div class="slide-attr"><div class="slide-attr-label">MOQ</div><div class="slide-attr-val">30 metres</div></div>
-                                <div class="slide-attr"><div class="slide-attr-label">Finish</div><div class="slide-attr-val">Anti-crease</div></div>
-                            </div>
-                            <div class="slide-actions">
-                                <a class="btn btn-primary" href="https://wa.me/919810366779?text=I'm%20interested%20in%20Suiting%20fabric%20wholesale%20pricing." target="_blank" rel="noopener noreferrer">Enquire on WhatsApp</a>
-                                <a class="btn btn-secondary" href="#gallery">View gallery</a>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- COTTON -->
-                    <div class="slide" id="slide-cotton" role="tabpanel">
-                        <div class="slide-images">
-                            <div class="slide-thumb-strip" id="thumbs-cotton"></div>
-                            <div class="slide-main-img" id="main-cotton">
-                                <img src="https://images.unsplash.com/photo-1591047139829-d91aecb6caea?w=800&q=80" alt="Model wearing cotton fabric outfit" width="800" height="520" loading="lazy" />
-                            </div>
-                            <button class="slide-arr prev" aria-label="Previous image" data-dir="-1" data-target="cotton">
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M15 18l-6-6 6-6"/></svg>
-                            </button>
-                            <button class="slide-arr next" aria-label="Next image" data-dir="1" data-target="cotton">
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M9 18l6-6-6-6"/></svg>
-                            </button>
-                        </div>
-                        <div class="slide-info">
-                            <span class="slide-cat-badge">
-                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg>
-                                Cotton
-                            </span>
-                            <h3>Pure Cotton Fabric</h3>
-                            <p class="desc">Soft, breathable, and skin-friendly cotton fabric for daily wear — kurtas, shirts, trousers, and casual wear. Best seller for summer garments.</p>
-                            <div class="slide-attrs">
-                                <div class="slide-attr"><div class="slide-attr-label">Composition</div><div class="slide-attr-val">100% Cotton</div></div>
-                                <div class="slide-attr"><div class="slide-attr-label">Width</div><div class="slide-attr-val">44" / 58"</div></div>
-                                <div class="slide-attr"><div class="slide-attr-label">MOQ</div><div class="slide-attr-val">50 metres</div></div>
-                                <div class="slide-attr"><div class="slide-attr-label">Finish</div><div class="slide-attr-val">Soft / Mercerised</div></div>
-                            </div>
-                            <div class="slide-actions">
-                                <a class="btn btn-primary" href="https://wa.me/919810366779?text=I'm%20interested%20in%20Cotton%20fabric%20wholesale%20pricing." target="_blank" rel="noopener noreferrer">Enquire on WhatsApp</a>
-                                <a class="btn btn-secondary" href="#gallery">View gallery</a>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- RAYON -->
-                    <div class="slide" id="slide-rayon" role="tabpanel">
-                        <div class="slide-images">
-                            <div class="slide-thumb-strip" id="thumbs-rayon"></div>
-                            <div class="slide-main-img" id="main-rayon">
-                                <img src="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=800&q=80" alt="Model wearing rayon fabric dress" width="800" height="520" loading="lazy" />
-                            </div>
-                            <button class="slide-arr prev" aria-label="Previous image" data-dir="-1" data-target="rayon">
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M15 18l-6-6 6-6"/></svg>
-                            </button>
-                            <button class="slide-arr next" aria-label="Next image" data-dir="1" data-target="rayon">
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M9 18l6-6-6-6"/></svg>
-                            </button>
-                        </div>
-                        <div class="slide-info">
-                            <span class="slide-cat-badge">
-                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg>
-                                Rayon
-                            </span>
-                            <h3>Rayon Fabric</h3>
-                            <p class="desc">Fluid, lightweight rayon with a beautiful drape — perfect for ladies' wear, kurtas, and ethnic garments. Excellent sheen with a soft, silky feel.</p>
-                            <div class="slide-attrs">
-                                <div class="slide-attr"><div class="slide-attr-label">Composition</div><div class="slide-attr-val">100% Viscose Rayon</div></div>
-                                <div class="slide-attr"><div class="slide-attr-label">Width</div><div class="slide-attr-val">44" / 58"</div></div>
-                                <div class="slide-attr"><div class="slide-attr-label">MOQ</div><div class="slide-attr-val">50 metres</div></div>
-                                <div class="slide-attr"><div class="slide-attr-label">Finish</div><div class="slide-attr-val">Sheen / Printed</div></div>
-                            </div>
-                            <div class="slide-actions">
-                                <a class="btn btn-primary" href="https://wa.me/919810366779?text=I'm%20interested%20in%20Rayon%20fabric%20wholesale%20pricing." target="_blank" rel="noopener noreferrer">Enquire on WhatsApp</a>
-                                <a class="btn btn-secondary" href="#gallery">View gallery</a>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- POPLIN -->
-                    <div class="slide" id="slide-poplin" role="tabpanel">
-                        <div class="slide-images">
-                            <div class="slide-thumb-strip" id="thumbs-poplin"></div>
-                            <div class="slide-main-img" id="main-poplin">
-                                <img src="https://images.unsplash.com/photo-1611312449408-fcece27cdbb7?w=800&q=80" alt="Model wearing poplin fabric shirt" width="800" height="520" loading="lazy" />
-                            </div>
-                            <button class="slide-arr prev" aria-label="Previous image" data-dir="-1" data-target="poplin">
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M15 18l-6-6 6-6"/></svg>
-                            </button>
-                            <button class="slide-arr next" aria-label="Next image" data-dir="1" data-target="poplin">
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M9 18l6-6-6-6"/></svg>
-                            </button>
-                        </div>
-                        <div class="slide-info">
-                            <span class="slide-cat-badge">
-                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg>
-                                Poplin
-                            </span>
-                            <h3>Poplin Fabric</h3>
-                            <p class="desc">Fine-weave poplin with a tight, smooth surface — ideal for formal shirts, school uniforms, and chef wear. Easy to stitch and maintain.</p>
-                            <div class="slide-attrs">
-                                <div class="slide-attr"><div class="slide-attr-label">Composition</div><div class="slide-attr-val">Cotton / Poly-cotton</div></div>
-                                <div class="slide-attr"><div class="slide-attr-label">Width</div><div class="slide-attr-val">44" / 58"</div></div>
-                                <div class="slide-attr"><div class="slide-attr-label">MOQ</div><div class="slide-attr-val">100 metres</div></div>
-                                <div class="slide-attr"><div class="slide-attr-label">Finish</div><div class="slide-attr-val">Easy-care</div></div>
-                            </div>
-                            <div class="slide-actions">
-                                <a class="btn btn-primary" href="https://wa.me/919810366779?text=I'm%20interested%20in%20Poplin%20fabric%20wholesale%20pricing." target="_blank" rel="noopener noreferrer">Enquire on WhatsApp</a>
-                                <a class="btn btn-secondary" href="#gallery">View gallery</a>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- YARN DYED -->
-                    <div class="slide" id="slide-yarndyed" role="tabpanel">
-                        <div class="slide-images">
-                            <div class="slide-thumb-strip" id="thumbs-yarndyed"></div>
-                            <div class="slide-main-img" id="main-yarndyed">
-                                <img src="https://images.unsplash.com/photo-1445205170230-053b83016050?w=800&q=80" alt="Model wearing yarn dyed fabric shirt" width="800" height="520" loading="lazy" />
-                            </div>
-                            <button class="slide-arr prev" aria-label="Previous image" data-dir="-1" data-target="yarndyed">
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M15 18l-6-6 6-6"/></svg>
-                            </button>
-                            <button class="slide-arr next" aria-label="Next image" data-dir="1" data-target="yarndyed">
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M9 18l6-6-6-6"/></svg>
-                            </button>
-                        </div>
-                        <div class="slide-info">
-                            <span class="slide-cat-badge">
-                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg>
-                                Yarn Dyed
-                            </span>
-                            <h3>Yarn Dyed Fabric</h3>
-                            <p class="desc">Rich checks and stripes woven with pre-dyed yarns for superior colour fastness. Vibrant patterns that don't fade — a favourite for casual shirts and ethnic wear.</p>
-                            <div class="slide-attrs">
-                                <div class="slide-attr"><div class="slide-attr-label">Composition</div><div class="slide-attr-val">Cotton / Linen blends</div></div>
-                                <div class="slide-attr"><div class="slide-attr-label">Width</div><div class="slide-attr-val">58" / 60"</div></div>
-                                <div class="slide-attr"><div class="slide-attr-label">MOQ</div><div class="slide-attr-val">50 metres</div></div>
-                                <div class="slide-attr"><div class="slide-attr-label">Finish</div><div class="slide-attr-val">Colour-fast</div></div>
-                            </div>
-                            <div class="slide-actions">
-                                <a class="btn btn-primary" href="https://wa.me/919810366779?text=I'm%20interested%20in%20Yarn%20Dyed%20fabric%20wholesale%20pricing." target="_blank" rel="noopener noreferrer">Enquire on WhatsApp</a>
-                                <a class="btn btn-secondary" href="#gallery">View gallery</a>
-                            </div>
-                        </div>
-                    </div>
-
-                </div><!-- /showcase-stage -->
-            </div>
-        </section>
-
-        <section class="section" id="collections">
-            <div class="container">
-                <div class="section-head reveal">
-                    <div><span class="eyebrow">Collections</span><h2>Explore Our Range</h2></div>
-                    <p>Wholesale supply of premium fabrics for tailors, retailers, and garment manufacturers.</p>
-                </div>
-                <div class="grid-3">
-                    <article class="card reveal">
-                        <div class="icon-chip">
-                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 7c0-1.7 1.3-3 3-3h10c1.7 0 3 1.3 3 3v10c0 1.7-1.3 3-3 3H7c-1.7 0-3-1.3-3-3V7Z" /><path d="M8 8h8v8H8z" /></svg>
-                        </div>
-                        <h3>Shirting &amp; suiting</h3>
-                        <p>Available in bulk for tailors, retailers, and garment manufacturers.</p>
-                    </article>
-                    <article class="card reveal">
-                        <div class="icon-chip">
-                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3 4 9l8 12 8-12-8-6Z" /><path d="M8.5 12h7" /></svg>
-                        </div>
-                        <h3>Occasion fabrics</h3>
-                        <p>Wholesale supply of festive and occasion fabrics in a wide range of designs.</p>
-                    </article>
-                    <article class="card reveal">
-                        <div class="icon-chip">
-                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 12h14" /><path d="M12 5v14" /><rect x="4" y="4" width="16" height="16" rx="3" /></svg>
-                        </div>
-                        <h3>Daily wear textiles</h3>
-                        <p>High-volume stock of everyday fabrics — ideal for resellers and cloth merchants.</p>
-                    </article>
-                </div>
-            </div>
-        </section>
-
-        <section class="section" id="gallery">
-            <div class="container">
-                <div class="section-head reveal">
-                    <div><span class="eyebrow">Gallery</span><h2>Featured Collections</h2></div>
-                    <p id="gallery-status" class="load-status">Loading&hellip;</p>
-                </div>
-                <div id="gallery-root"></div>
-            </div>
-        </section>
-
-        <section class="section" id="location">
-            <div class="container story-grid">
-                <div class="story-copy reveal">
-                    <span class="eyebrow">Contact Us</span>
-                    <h2>Visit or reach out</h2>
-                    <p>Get in touch for bulk orders, trade inquiries, or wholesale pricing.</p>
-                    <ul class="contact-list">
-                        <li><span class="contact-label">Address</span><span id="contact-address"></span></li>
-                        <li><span class="contact-label">Phone</span><span id="contact-phone"></span></li>
-                        <li><span class="contact-label">Email</span><span id="contact-email"></span></li>
-                    </ul>
-                </div>
-                <div class="map-card reveal">
-                    <iframe
-                        title="M K Fabrics location map"
-                        loading="lazy"
-                        allowfullscreen
-                        referrerpolicy="no-referrer-when-downgrade"
-                        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3507.0!2d77.2789!3d28.5062!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMjjCsDMwJzIyLjMiTiA3N8KwMTYnNDQuMCJF!5e0!3m2!1sen!2sin!4v1718707200000!5m2!1sen!2sin"
-                    ></iframe>
-                    <a
-                        class="map-open-link"
-                        href="https://maps.app.goo.gl/aRBCEhAM661dmsro7"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                    >
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7Z"/><circle cx="12" cy="9" r="2.5"/></svg>
-                        Open in Google Maps
-                    </a>
-                </div>
-            </div>
-        </section>
-    </main>
-    <footer class="footer">
-        <div class="container footer-inner">
-            <p>M K Fabrics &middot; Premium Textiles</p>
-        </div>
-    </footer>
-    <a class="whatsapp-float" id="whatsapp-float" href="https://wa.me/919810366779?text=Hello%20M%20K%20Fabrics%2C%20I%20want%20to%20know%20more%20about%20your%20fabric%20collection." target="_blank" rel="noopener noreferrer" aria-label="Chat on WhatsApp">
-        <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20.52 3.48A11.82 11.82 0 0 0 12.07 0C5.55 0 .25 5.3.25 11.82c0 2.08.54 4.11 1.57 5.91L0 24l6.45-1.69a11.8 11.8 0 0 0 5.62 1.43h.01c6.52 0 11.82-5.3 11.82-11.82 0-3.16-1.23-6.13-3.38-8.44Z" /></svg>
-    </a>
-
-    <script>
-        /* ── SHOWCASE SLIDER ─────────────────────────────────────────────── */
-        const SLIDE_DATA = {
-            shirting: [
-                { src:'https://images.unsplash.com/photo-1594938298603-c8148c4b4f26?w=800&q=80', alt:'Shirting fabric shirt — front view' },
-                { src:'https://images.unsplash.com/photo-1598032895397-b9472444bf93?w=800&q=80', alt:'Shirting fabric — texture close-up' },
-                { src:'https://images.unsplash.com/photo-1602810316693-3667c854239a?w=800&q=80', alt:'Shirting fabric shirt — side profile' }
-            ],
-            suiting: [
-                { src:'https://images.unsplash.com/photo-1507679799987-c73779587ccf?w=800&q=80', alt:'Suiting fabric suit — full look' },
-                { src:'https://images.unsplash.com/photo-1555069519-127aadecd35f?w=800&q=80', alt:'Suiting fabric — drape detail' },
-                { src:'https://images.unsplash.com/photo-1621072156002-e2fccdc0b176?w=800&q=80', alt:'Suiting fabric — formal wear' }
-            ],
-            cotton: [
-                { src:'https://images.unsplash.com/photo-1591047139829-d91aecb6caea?w=800&q=80', alt:'Cotton fabric outfit' },
-                { src:'https://images.unsplash.com/photo-1512327536842-5aa37d1ba3e3?w=800&q=80', alt:'Cotton fabric kurta' },
-                { src:'https://images.unsplash.com/photo-1596755094514-f87e34085b2c?w=800&q=80', alt:'Cotton fabric — casual wear' }
-            ],
-            rayon: [
-                { src:'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=800&q=80', alt:'Rayon fabric dress' },
-                { src:'https://images.unsplash.com/photo-1539109136881-3be0616acf4b?w=800&q=80', alt:'Rayon fabric — drape' },
-                { src:'https://images.unsplash.com/photo-1572804013309-59a88b7e92f1?w=800&q=80', alt:'Rayon fabric — ethnic wear' }
-            ],
-            poplin: [
-                { src:'https://images.unsplash.com/photo-1611312449408-fcece27cdbb7?w=800&q=80', alt:'Poplin fabric shirt' },
-                { src:'https://images.unsplash.com/photo-1620012253295-c15cc3e65df4?w=800&q=80', alt:'Poplin fabric — smooth weave' },
-                { src:'https://images.unsplash.com/photo-1603251578711-3290595e4aa3?w=800&q=80', alt:'Poplin fabric — uniform shirt' }
-            ],
-            yarndyed: [
-                { src:'https://images.unsplash.com/photo-1445205170230-053b83016050?w=800&q=80', alt:'Yarn dyed check fabric shirt' },
-                { src:'https://images.unsplash.com/photo-1489987707025-afc232f7ea0f?w=800&q=80', alt:'Yarn dyed stripe shirt' },
-                { src:'https://images.unsplash.com/photo-1434389677669-e08b4cac3105?w=800&q=80', alt:'Yarn dyed fabric — colour detail' }
-            ]
-        };
-
-        const slideState = {};
-
-        function buildThumbs(cat) {
-            const strip = document.getElementById('thumbs-' + cat);
-            if (!strip || strip.children.length) return;
-            SLIDE_DATA[cat].forEach((img, i) => {
-                const th = document.createElement('button');
-                th.className = 'slide-thumb' + (i === 0 ? ' active' : '');
-                th.setAttribute('aria-label', 'View image ' + (i + 1));
-                th.innerHTML = `<img src="${img.src}" alt="${img.alt}" width="64" height="64" loading="lazy">`;
-                th.addEventListener('click', () => setSlideImage(cat, i));
-                strip.appendChild(th);
-            });
-        }
-
-        function setSlideImage(cat, idx) {
-            const data = SLIDE_DATA[cat];
-            idx = ((idx % data.length) + data.length) % data.length;
-            slideState[cat] = idx;
-            const mainImg = document.querySelector('#main-' + cat + ' img');
-            if (mainImg) {
-                mainImg.style.opacity = '0';
-                setTimeout(() => {
-                    mainImg.src = data[idx].src;
-                    mainImg.alt = data[idx].alt;
-                    mainImg.style.opacity = '1';
-                }, 150);
-            }
-            const thumbs = document.querySelectorAll('#thumbs-' + cat + ' .slide-thumb');
-            thumbs.forEach((t, i) => t.classList.toggle('active', i === idx));
-        }
-
-        // Init all slides
-        Object.keys(SLIDE_DATA).forEach(cat => {
-            slideState[cat] = 0;
-            buildThumbs(cat);
-        });
-
-        // Arrow buttons
-        document.querySelectorAll('.slide-arr').forEach(btn => {
-            btn.addEventListener('click', () => {
-                const cat = btn.dataset.target;
-                const dir = parseInt(btn.dataset.dir);
-                setSlideImage(cat, (slideState[cat] || 0) + dir);
-            });
-        });
-
-        // Category tabs
-        document.querySelectorAll('.tab-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                const cat = btn.dataset.cat;
-                document.querySelectorAll('.tab-btn').forEach(b => {
-                    b.classList.remove('active');
-                    b.setAttribute('aria-selected', 'false');
-                });
-                btn.classList.add('active');
-                btn.setAttribute('aria-selected', 'true');
-                document.querySelectorAll('.slide').forEach(s => s.classList.remove('active'));
-                const target = document.getElementById('slide-' + cat);
-                if (target) {
-                    target.classList.add('active');
-                    buildThumbs(cat);
-                }
-            });
-        });
-
-        /* ── GALLERY ─────────────────────────────────────────────────────── */
-        const ITEMS_PER_PAGE = 8;
-        const OWNER = 'maheshs5612';
-        const REPO  = 'm-k-fabrics-web';
-
-        async function loadContact() {
-            try {
-                const d = await fetch('./content/contact.json').then(r => r.json());
-                document.getElementById('contact-address').textContent = d.address || '';
-                document.getElementById('contact-phone').textContent   = d.phone   || '';
-                document.getElementById('contact-email').textContent   = d.email   || '';
-                const wa = d.whatsapp || '#';
-                document.getElementById('whatsapp-top').href   = wa;
-                document.getElementById('whatsapp-float').href = wa;
-            } catch(e) {}
-        }
-
-        function cardHTML(item) {
-            return `
-            <figure class="gallery-item">
-                <div class="img-wrap">
-                    <img src="${item.image}" alt="${item.title || ''}" loading="lazy">
-                </div>
-                <figcaption>
-                    <h4>${item.title || ''}</h4>
-                    ${item.note ? `<p>${item.note}</p>` : ''}
-                </figcaption>
-            </figure>`;
-        }
-
-        function renderCategory(categoryName, items) {
-            const section = document.createElement('div');
-            section.className = 'gallery-section reveal';
-            const header = document.createElement('div');
-            header.className = 'gallery-category-header';
-            header.innerHTML = `<h3>${categoryName}</h3>`;
-            section.appendChild(header);
-            const grid = document.createElement('div');
-            grid.className = 'gallery-grid';
-            items.forEach((item, i) => {
-                const wrap = document.createElement('div');
-                wrap.innerHTML = cardHTML(item);
-                const fig = wrap.firstElementChild;
-                if (i >= ITEMS_PER_PAGE) fig.style.display = 'none';
-                grid.appendChild(fig);
-            });
-            section.appendChild(grid);
-            if (items.length > ITEMS_PER_PAGE) {
-                const wrap = document.createElement('div');
-                wrap.className = 'show-more-wrap';
-                const btn = document.createElement('button');
-                btn.className = 'btn-show-more';
-                btn.textContent = `Show all ${items.length} items`;
-                btn.addEventListener('click', () => {
-                    grid.querySelectorAll('.gallery-item').forEach(el => el.style.display = '');
-                    wrap.remove();
-                });
-                wrap.appendChild(btn);
-                section.appendChild(wrap);
-            }
-            return section;
-        }
-
-        async function loadGallery() {
-            const status = document.getElementById('gallery-status');
-            const root   = document.getElementById('gallery-root');
-            try {
-                const files = await fetch(
-                    `https://api.github.com/repos/${OWNER}/${REPO}/contents/content/gallery`,
-                    { headers: { Accept: 'application/vnd.github+json' } }
-                ).then(r => r.json());
-                const jsonFiles = Array.isArray(files)
-                    ? files.filter(f => f.name.endsWith('.json') && f.name !== 'index.json')
-                    : [];
-                if (!jsonFiles.length) {
-                    status.textContent = 'Gallery coming soon. Check back for updates.';
-                    return;
-                }
-                const items = await Promise.all(
-                    jsonFiles.map(f => fetch(f.download_url).then(r => r.json()))
-                );
-                const groups = {};
-                items.forEach(item => {
-                    const cat = item.category || 'Other';
-                    if (!groups[cat]) groups[cat] = [];
-                    groups[cat].push(item);
-                });
-                const ORDER = ['Rayon','Cambric','Poplin','Modal','Yarn Dyed','Cotton','Cotton Voile','Suiting','Shirting','Other'];
-                const sorted = [
-                    ...ORDER.filter(c => groups[c]),
-                    ...Object.keys(groups).filter(c => !ORDER.includes(c))
-                ];
-                sorted.forEach(cat => root.appendChild(renderCategory(cat, groups[cat])));
-                document.querySelectorAll('.gallery-section.reveal').forEach(el => revealObserver.observe(el));
-                status.textContent = `${items.length} item${items.length !== 1 ? 's' : ''} across ${sorted.length} categor${sorted.length !== 1 ? 'ies' : 'y'}.`;
-            } catch(e) {
-                status.textContent = 'Gallery coming soon. Check back for updates.';
-            }
-        }
-
-        const revealObserver = new IntersectionObserver(
-            entries => entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('is-visible'); }),
-            { threshold: 0.1 }
-        );
-        document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
-
-        loadContact();
-        loadGallery();
-
-        (function () {
-            const root   = document.documentElement;
-            const toggle = document.querySelector('[data-theme-toggle]');
-            let theme    = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-            root.setAttribute('data-theme', theme);
-            const draw = () => {
-                toggle.innerHTML = theme === 'dark'
-                    ? '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"></circle><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"></path></svg>'
-                    : '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>';
-            };
-            draw();
-            toggle.addEventListener('click', () => { theme = theme === 'dark' ? 'light' : 'dark'; root.setAttribute('data-theme', theme); draw(); });
-            const menuToggle = document.querySelector('[data-menu-toggle]');
-            const nav = document.getElementById('site-nav');
-            menuToggle?.addEventListener('click', () => {
-                const open = nav.classList.toggle('open');
-                menuToggle.setAttribute('aria-expanded', String(open));
-            });
-            nav.querySelectorAll('a').forEach(link => link.addEventListener('click', () => {
-                nav.classList.remove('open');
-                menuToggle?.setAttribute('aria-expanded', 'false');
-            }));
-        })();
-    </script>
-</body>
-</html>
+                        <div><strong>P
