@@ -185,11 +185,26 @@
             border:1px solid color-mix(in srgb,var(--color-text) 10%,transparent);
             border-radius:1.25rem;overflow:hidden;box-shadow:var(--shadow-sm);
             transition:box-shadow var(--transition),transform var(--transition);
+            cursor:pointer;
         }
         .gallery-item:hover{box-shadow:var(--shadow-md);transform:translateY(-3px);}
-        .gallery-item .img-wrap{width:100%;aspect-ratio:1/1;overflow:hidden;background:var(--color-surface-offset);}
+        .gallery-item .img-wrap{
+            width:100%;aspect-ratio:1/1;overflow:hidden;
+            background:var(--color-surface-offset);position:relative;
+        }
         .gallery-item .img-wrap img{width:100%;height:100%;object-fit:cover;object-position:center;transition:transform 0.4s ease;}
         .gallery-item:hover .img-wrap img{transform:scale(1.04);}
+        /* multi-image badge */
+        .img-count-badge{
+            position:absolute;bottom:0.5rem;right:0.5rem;
+            display:inline-flex;align-items:center;gap:0.3rem;
+            padding:0.2rem 0.55rem;
+            border-radius:9999px;
+            font-size:0.7rem;font-weight:700;letter-spacing:0.04em;
+            background:rgba(0,0,0,0.55);color:#fff;
+            backdrop-filter:blur(4px);
+            pointer-events:none;
+        }
         .gallery-item figcaption{padding:0.9rem 1rem 1rem;}
         .gallery-item h4{font-family:var(--font-display);font-size:var(--text-sm);font-weight:700;margin-bottom:0.2rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
         .gallery-item p{font-size:var(--text-xs);color:var(--color-text-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
@@ -241,6 +256,70 @@
         }
         .reveal{opacity:0;transform:translateY(20px);transition:opacity 0.6s ease,transform 0.6s ease;}
         .reveal.is-visible{opacity:1;transform:none;}
+
+        /* ── Lightbox ── */
+        .lightbox-overlay{
+            display:none;position:fixed;inset:0;z-index:200;
+            background:rgba(0,0,0,0.88);backdrop-filter:blur(6px);
+            align-items:center;justify-content:center;
+        }
+        .lightbox-overlay.open{display:flex;}
+        .lightbox{
+            position:relative;width:min(90vw,860px);
+            background:var(--color-surface);
+            border-radius:1.5rem;overflow:hidden;
+            box-shadow:var(--shadow-lg);
+            display:flex;flex-direction:column;
+        }
+        .lightbox-img-track{
+            position:relative;width:100%;aspect-ratio:4/3;overflow:hidden;
+            background:var(--color-surface-offset);
+        }
+        .lightbox-img-track img{
+            position:absolute;inset:0;width:100%;height:100%;
+            object-fit:contain;
+            opacity:0;transition:opacity 0.35s ease;
+        }
+        .lightbox-img-track img.active{opacity:1;}
+        .lightbox-meta{
+            padding:1rem 1.25rem 1.25rem;
+            display:flex;align-items:center;justify-content:space-between;
+            gap:1rem;
+        }
+        .lightbox-info{}
+        .lightbox-info h3{font-family:var(--font-display);font-size:var(--text-lg);font-weight:700;}
+        .lightbox-info p{font-size:var(--text-sm);color:var(--color-text-muted);}
+        .lightbox-controls{display:flex;align-items:center;gap:0.5rem;flex-shrink:0;}
+        .lb-btn{
+            min-width:44px;min-height:44px;border-radius:9999px;
+            border:1px solid color-mix(in srgb,var(--color-text) 12%,transparent);
+            background:var(--color-surface-2);
+            color:var(--color-text);display:grid;place-items:center;
+            transition:background var(--transition);
+        }
+        .lb-btn:hover{background:var(--color-surface-offset);}
+        .lb-btn:disabled{opacity:0.3;cursor:default;}
+        .lb-close{
+            position:absolute;top:0.75rem;right:0.75rem;
+            z-index:2;min-width:40px;min-height:40px;
+            border-radius:9999px;
+            background:rgba(0,0,0,0.5);color:#fff;
+            border:none;display:grid;place-items:center;
+        }
+        .lb-dots{
+            display:flex;gap:0.35rem;align-items:center;justify-content:center;
+            padding:0.5rem 0 0.25rem;
+        }
+        .lb-dot{
+            width:7px;height:7px;border-radius:9999px;
+            background:var(--color-border);transition:background var(--transition),transform var(--transition);
+        }
+        .lb-dot.active{background:var(--color-primary);transform:scale(1.3);}
+        .lb-counter{
+            font-size:var(--text-xs);color:var(--color-text-faint);
+            letter-spacing:0.04em;white-space:nowrap;
+        }
+
         @media(max-width:960px){
             .hero-grid,.contact-grid,.story-grid,.grid-3,.hero-facts{grid-template-columns:1fr;}
             .hero-visual{min-height:26rem;order:-1;}
@@ -257,10 +336,14 @@
             .menu-toggle{display:grid;}
             .header-actions .btn-primary{display:none;}
             .gallery-grid{grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:0.9rem;}
+            .lightbox{width:100vw;border-radius:1rem 1rem 0 0;}
+            .lightbox-overlay{align-items:flex-end;}
+            .lightbox-img-track{aspect-ratio:1/1;}
         }
         @media(prefers-reduced-motion:reduce){
             html{scroll-behavior:auto;}
             .reveal{opacity:1;transform:none;transition:none;}
+            .lightbox-img-track img{transition:none;}
         }
     </style>
 </head>
@@ -317,6 +400,34 @@
             </div>
         </div>
     </header>
+
+    <!-- Lightbox overlay -->
+    <div class="lightbox-overlay" id="lightbox-overlay" role="dialog" aria-modal="true" aria-label="Image viewer">
+        <div class="lightbox" id="lightbox">
+            <div class="lightbox-img-track" id="lb-track">
+                <button class="lb-close" id="lb-close" aria-label="Close image viewer">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6 6 18M6 6l12 12"/></svg>
+                </button>
+            </div>
+            <div class="lb-dots" id="lb-dots"></div>
+            <div class="lightbox-meta">
+                <div class="lightbox-info">
+                    <h3 id="lb-title"></h3>
+                    <p id="lb-note"></p>
+                </div>
+                <div class="lightbox-controls">
+                    <span class="lb-counter" id="lb-counter"></span>
+                    <button class="lb-btn" id="lb-prev" aria-label="Previous image">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
+                    </button>
+                    <button class="lb-btn" id="lb-next" aria-label="Next image">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <main>
         <section class="hero" id="home">
             <div class="container hero-grid">
@@ -367,10 +478,10 @@
                     </article>
                     <article class="card reveal">
                         <div class="icon-chip">
-                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 12h14" /><path d="M12 5v14" /><rect x="4" y="4" width="16" height="16" rx="3" /></svg>
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 12h14" /><path d="M12 5v14" /><rect x="4" y="4" width="16" height="16" rx="2"/></svg>
                         </div>
-                        <h3>Daily wear textiles</h3>
-                        <p>High-volume stock of everyday fabrics — ideal for resellers and cloth merchants.</p>
+                        <h3>Custom bulk orders</h3>
+                        <p>Specific patterns, weaves, or quantities — contact us to discuss your requirements.</p>
                     </article>
                 </div>
             </div>
@@ -378,185 +489,266 @@
         <section class="section" id="gallery">
             <div class="container">
                 <div class="section-head reveal">
-                    <div><span class="eyebrow">Gallery</span><h2>Featured Collections</h2></div>
-                    <p id="gallery-status" class="load-status">Loading&hellip;</p>
+                    <div><span class="eyebrow">Gallery</span><h2>Our Fabrics</h2></div>
                 </div>
-                <div id="gallery-root"></div>
+                <div id="gallery-root"><p class="load-status">Loading gallery…</p></div>
             </div>
         </section>
         <section class="section" id="location">
-            <div class="container story-grid">
-                <div class="story-copy reveal">
-                    <span class="eyebrow">Contact Us</span>
-                    <h2>Visit or reach out</h2>
-                    <p>Get in touch for bulk orders, trade inquiries, or wholesale pricing.</p>
-                    <ul class="contact-list">
-                        <li><span class="contact-label">Address</span><span id="contact-address"></span></li>
-                        <li><span class="contact-label">Phone</span><span id="contact-phone"></span></li>
-                        <li><span class="contact-label">Email</span><span id="contact-email"></span></li>
-                    </ul>
+            <div class="container">
+                <div class="section-head reveal">
+                    <div><span class="eyebrow">Location</span><h2>Visit Us</h2></div>
                 </div>
-                <div class="map-card reveal">
-                    <iframe
-                        title="M K Fabrics location map"
-                        loading="lazy"
-                        allowfullscreen
-                        referrerpolicy="no-referrer-when-downgrade"
-                        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3507.0!2d77.2789!3d28.5062!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMjjCsDMwJzIyLjMiTiA3N8KwMTYnNDQuMCJF!5e0!3m2!1sen!2sin!4v1718707200000!5m2!1sen!2sin"
-                    ></iframe>
-                    <a
-                        class="map-open-link"
-                        href="https://maps.app.goo.gl/aRBCEhAM661dmsro7"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                    >
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7Z"/><circle cx="12" cy="9" r="2.5"/></svg>
-                        Open in Google Maps
-                    </a>
+                <div class="contact-grid">
+                    <div>
+                        <div class="card reveal">
+                            <h3>Contact Details</h3>
+                            <ul class="contact-list" id="contact-list">
+                                <li><span class="contact-label">Phone</span><span id="c-phone">Loading…</span></li>
+                                <li><span class="contact-label">Email</span><span id="c-email">Loading…</span></li>
+                                <li><span class="contact-label">Address</span><span id="c-address">Loading…</span></li>
+                            </ul>
+                            <a id="c-whatsapp" class="btn btn-primary" style="margin-top:1.25rem;" href="#" target="_blank" rel="noopener noreferrer">WhatsApp us</a>
+                        </div>
+                    </div>
+                    <div class="map-card reveal">
+                        <iframe
+                            src="https://maps.google.com/maps?q=Kinari+Bazar+Chandni+Chowk+Delhi&output=embed"
+                            loading="lazy" allowfullscreen referrerpolicy="no-referrer-when-downgrade"
+                            title="M K Fabrics location map"></iframe>
+                        <a class="map-open-link" href="https://maps.google.com/?q=Kinari+Bazar+Chandni+Chowk+Delhi" target="_blank" rel="noopener noreferrer">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                            Open in Google Maps
+                        </a>
+                    </div>
                 </div>
             </div>
         </section>
     </main>
     <footer class="footer">
         <div class="container footer-inner">
-            <p>M K Fabrics &middot; Premium Textiles</p>
+            <span>&copy; <span id="yr"></span> M K Fabrics. All rights reserved.</span>
+            <span>Premium textile wholesale, Delhi.</span>
         </div>
     </footer>
     <a class="whatsapp-float" id="whatsapp-float" href="https://wa.me/919810366779?text=Hello%20M%20K%20Fabrics%2C%20I%20want%20to%20know%20more%20about%20your%20fabric%20collection." target="_blank" rel="noopener noreferrer" aria-label="Chat on WhatsApp">
-        <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20.52 3.48A11.82 11.82 0 0 0 12.07 0C5.55 0 .25 5.3.25 11.82c0 2.08.54 4.11 1.57 5.91L0 24l6.45-1.69a11.8 11.8 0 0 0 5.62 1.43h.01c6.52 0 11.82-5.3 11.82-11.82 0-3.16-1.23-6.13-3.38-8.44Z" /></svg>
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/></svg>
     </a>
+
     <script>
-        const ITEMS_PER_PAGE = 8;
-        const OWNER = 'maheshs5612';
-        const REPO  = 'm-k-fabrics-web';
-
-        async function loadContact() {
-            try {
-                const d = await fetch('./content/contact.json').then(r => r.json());
-                document.getElementById('contact-address').textContent = d.address || '';
-                document.getElementById('contact-phone').textContent   = d.phone   || '';
-                document.getElementById('contact-email').textContent   = d.email   || '';
-                const wa = d.whatsapp || '#';
-                document.getElementById('whatsapp-top').href   = wa;
-                document.getElementById('whatsapp-float').href = wa;
-            } catch(e) {}
+    // ── Theme toggle ──
+    (function(){
+        const t=document.querySelector('[data-theme-toggle]'),r=document.documentElement;
+        let d=matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light';
+        r.setAttribute('data-theme',d);
+        function setIcon(){
+            if(!t)return;
+            t.innerHTML=d==='dark'
+                ?'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>'
+                :'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>';
         }
+        setIcon();
+        t&&t.addEventListener('click',()=>{d=d==='dark'?'light':'dark';r.setAttribute('data-theme',d);setIcon();});
+    })();
 
-        function cardHTML(item) {
-            return `
-            <figure class="gallery-item">
-                <div class="img-wrap">
-                    <img src="${item.image}" alt="${item.title || ''}" loading="lazy">
-                </div>
-                <figcaption>
-                    <h4>${item.title || ''}</h4>
-                    ${item.note ? `<p>${item.note}</p>` : ''}
-                </figcaption>
-            </figure>`;
-        }
+    // ── Mobile nav ──
+    document.querySelector('[data-menu-toggle]').addEventListener('click',function(){
+        const nav=document.getElementById('site-nav');
+        const open=nav.classList.toggle('open');
+        this.setAttribute('aria-expanded',open);
+    });
 
-        function renderCategory(categoryName, items) {
-            const section = document.createElement('div');
-            section.className = 'gallery-section reveal';
-            const header = document.createElement('div');
-            header.className = 'gallery-category-header';
-            header.innerHTML = `<h3>${categoryName}</h3>`;
-            section.appendChild(header);
-            const grid = document.createElement('div');
-            grid.className = 'gallery-grid';
-            items.forEach((item, i) => {
-                const wrap = document.createElement('div');
-                wrap.innerHTML = cardHTML(item);
-                const fig = wrap.firstElementChild;
-                if (i >= ITEMS_PER_PAGE) fig.style.display = 'none';
-                grid.appendChild(fig);
-            });
-            section.appendChild(grid);
-            if (items.length > ITEMS_PER_PAGE) {
-                const wrap = document.createElement('div');
-                wrap.className = 'show-more-wrap';
-                const btn = document.createElement('button');
-                btn.className = 'btn-show-more';
-                btn.textContent = `Show all ${items.length} items`;
-                btn.addEventListener('click', () => {
-                    grid.querySelectorAll('.gallery-item').forEach(el => el.style.display = '');
-                    wrap.remove();
-                });
-                wrap.appendChild(btn);
-                section.appendChild(wrap);
-            }
-            return section;
-        }
+    // ── Year ──
+    document.getElementById('yr').textContent=new Date().getFullYear();
 
-        async function loadGallery() {
-            const status = document.getElementById('gallery-status');
-            const root   = document.getElementById('gallery-root');
-            try {
-                const files = await fetch(
-                    `https://api.github.com/repos/${OWNER}/${REPO}/contents/content/gallery`,
-                    { headers: { Accept: 'application/vnd.github+json' } }
-                ).then(r => r.json());
-                const jsonFiles = Array.isArray(files)
-                    ? files.filter(f => f.name.endsWith('.json') && f.name !== 'index.json')
-                    : [];
-                if (!jsonFiles.length) {
-                    status.textContent = 'Gallery coming soon. Check back for updates.';
-                    return;
-                }
-                const items = await Promise.all(
-                    jsonFiles.map(f => fetch(f.download_url).then(r => r.json()))
-                );
-                const groups = {};
-                items.forEach(item => {
-                    const cat = item.category || 'Other';
-                    if (!groups[cat]) groups[cat] = [];
-                    groups[cat].push(item);
-                });
-                const ORDER = ['Rayon','Cambric','Poplin','Modal','Yarn Dyed','Cotton','Cotton Voile','Suiting','Shirting','Other'];
-                const sorted = [
-                    ...ORDER.filter(c => groups[c]),
-                    ...Object.keys(groups).filter(c => !ORDER.includes(c))
-                ];
-                sorted.forEach(cat => root.appendChild(renderCategory(cat, groups[cat])));
-                document.querySelectorAll('.gallery-section.reveal').forEach(el => revealObserver.observe(el));
-                status.textContent = `${items.length} item${items.length !== 1 ? 's' : ''} across ${sorted.length} categor${sorted.length !== 1 ? 'ies' : 'y'}.`;
-            } catch(e) {
-                status.textContent = 'Gallery coming soon. Check back for updates.';
-            }
-        }
+    // ── Reveal on scroll ──
+    const revealObs=new IntersectionObserver(entries=>{
+        entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('is-visible');}});
+    },{threshold:0.12});
+    document.querySelectorAll('.reveal').forEach(el=>revealObs.observe(el));
 
-        const revealObserver = new IntersectionObserver(
-            entries => entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('is-visible'); }),
-            { threshold: 0.1 }
-        );
-        document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
+    // ── Lightbox ──
+    const overlay=document.getElementById('lightbox-overlay');
+    const lbTrack=document.getElementById('lb-track');
+    const lbDots=document.getElementById('lb-dots');
+    const lbTitle=document.getElementById('lb-title');
+    const lbNote=document.getElementById('lb-note');
+    const lbCounter=document.getElementById('lb-counter');
+    const lbPrev=document.getElementById('lb-prev');
+    const lbNext=document.getElementById('lb-next');
+    const lbClose=document.getElementById('lb-close');
 
-        loadContact();
-        loadGallery();
+    let lbImages=[],lbIdx=0;
 
-        (function () {
-            const root   = document.documentElement;
-            const toggle = document.querySelector('[data-theme-toggle]');
-            let theme    = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-            root.setAttribute('data-theme', theme);
-            const draw = () => {
-                toggle.innerHTML = theme === 'dark'
-                    ? '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"></circle><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"></path></svg>'
-                    : '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>';
-            };
-            draw();
-            toggle.addEventListener('click', () => { theme = theme === 'dark' ? 'light' : 'dark'; root.setAttribute('data-theme', theme); draw(); });
-            const menuToggle = document.querySelector('[data-menu-toggle]');
-            const nav = document.getElementById('site-nav');
-            menuToggle?.addEventListener('click', () => {
-                const open = nav.classList.toggle('open');
-                menuToggle.setAttribute('aria-expanded', String(open));
-            });
-            nav.querySelectorAll('a').forEach(link => link.addEventListener('click', () => {
-                nav.classList.remove('open');
-                menuToggle?.setAttribute('aria-expanded', 'false');
+    function lbShow(idx){
+        lbIdx=Math.max(0,Math.min(idx,lbImages.length-1));
+        lbTrack.querySelectorAll('img').forEach((img,i)=>{
+            img.classList.toggle('active',i===lbIdx);
+        });
+        lbDots.querySelectorAll('.lb-dot').forEach((dot,i)=>{
+            dot.classList.toggle('active',i===lbIdx);
+        });
+        lbCounter.textContent=lbImages.length>1?(lbIdx+1)+' / '+lbImages.length:'';
+        lbPrev.disabled=lbIdx===0;
+        lbNext.disabled=lbIdx===lbImages.length-1;
+    }
+
+    function openLightbox(images,title,note){
+        lbImages=images;
+        // clear previous images (keep close btn)
+        lbTrack.querySelectorAll('img').forEach(img=>img.remove());
+        lbDots.innerHTML='';
+        images.forEach((src,i)=>{
+            const img=document.createElement('img');
+            img.src=src;
+            img.alt=(title||'Gallery image')+' '+(i+1);
+            img.loading=i===0?'eager':'lazy';
+            lbTrack.appendChild(img);
+            const dot=document.createElement('button');
+            dot.className='lb-dot';
+            dot.setAttribute('aria-label','Go to image '+(i+1));
+            dot.addEventListener('click',()=>lbShow(i));
+            lbDots.appendChild(dot);
+        });
+        lbDots.style.display=images.length>1?'flex':'none';
+        lbTitle.textContent=title||'';
+        lbNote.textContent=note||'';
+        lbShow(0);
+        overlay.classList.add('open');
+        document.body.style.overflow='hidden';
+        lbClose.focus();
+    }
+
+    function closeLightbox(){
+        overlay.classList.remove('open');
+        document.body.style.overflow='';
+    }
+
+    lbClose.addEventListener('click',closeLightbox);
+    overlay.addEventListener('click',e=>{if(e.target===overlay)closeLightbox();});
+    lbPrev.addEventListener('click',()=>lbShow(lbIdx-1));
+    lbNext.addEventListener('click',()=>lbShow(lbIdx+1));
+    document.addEventListener('keydown',e=>{
+        if(!overlay.classList.contains('open'))return;
+        if(e.key==='ArrowLeft')lbShow(lbIdx-1);
+        if(e.key==='ArrowRight')lbShow(lbIdx+1);
+        if(e.key==='Escape')closeLightbox();
+    });
+    // Touch swipe
+    let touchStartX=0;
+    lbTrack.addEventListener('touchstart',e=>{touchStartX=e.touches[0].clientX;},{passive:true});
+    lbTrack.addEventListener('touchend',e=>{
+        const dx=touchStartX-e.changedTouches[0].clientX;
+        if(Math.abs(dx)>40){dx>0?lbShow(lbIdx+1):lbShow(lbIdx-1);}
+    },{passive:true});
+
+    // ── Gallery loader ──
+    async function loadGallery(){
+        const root=document.getElementById('gallery-root');
+        try{
+            const listRes=await fetch('/content/gallery/');
+            if(!listRes.ok)throw new Error('gallery index unavailable');
+            const listText=await listRes.text();
+            // parse filenames from directory listing or fallback to empty
+            const fileMatches=[...listText.matchAll(/href="([^"]+\.json)"/g)].map(m=>m[1]);
+            if(!fileMatches.length){root.innerHTML='<p class="load-status">No gallery items yet.</p>';return;}
+
+            const items=await Promise.all(fileMatches.map(async f=>{
+                const r=await fetch(f);
+                return r.ok?r.json():null;
             }));
-        })();
+            const valid=items.filter(Boolean);
+            if(!valid.length){root.innerHTML='<p class="load-status">No gallery items yet.</p>';return;}
+
+            // group by category
+            const grouped={};
+            valid.forEach(item=>{
+                const cat=item.category||'Other';
+                if(!grouped[cat])grouped[cat]=[];
+                grouped[cat].push(item);
+            });
+
+            const INITIAL_SHOW=6;
+            root.innerHTML='';
+            Object.entries(grouped).forEach(([cat,catItems])=>{
+                const sec=document.createElement('div');
+                sec.className='gallery-section reveal';
+                const header=document.createElement('div');
+                header.className='gallery-category-header';
+                header.innerHTML='<h3>'+cat+'</h3>';
+                sec.appendChild(header);
+                const grid=document.createElement('div');
+                grid.className='gallery-grid';
+
+                catItems.forEach((item,idx)=>{
+                    // Normalise: support both `images` array and legacy `image` string
+                    const imgs=Array.isArray(item.images)&&item.images.length
+                        ?item.images
+                        :(item.image?[item.image]:[]);
+                    if(!imgs.length)return;
+                    const thumb=imgs[0];
+
+                    const fig=document.createElement('figure');
+                    fig.className='gallery-item'+(idx>=INITIAL_SHOW?' hidden-item':'');
+                    fig.style.display=idx>=INITIAL_SHOW?'none':'';
+                    fig.setAttribute('tabindex','0');
+                    fig.setAttribute('role','button');
+                    fig.setAttribute('aria-label','View '+item.title+(imgs.length>1?' ('+imgs.length+' photos)':''));
+
+                    fig.innerHTML=
+                        '<div class="img-wrap">'+
+                            '<img src="'+thumb+'" alt="'+item.title+'" loading="lazy" width="400" height="400">'+
+                            (imgs.length>1
+                                ?'<span class="img-count-badge"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>'+imgs.length+'</span>'
+                                :'')+
+                        '</div>'+
+                        '<figcaption>'+
+                            '<h4>'+item.title+'</h4>'+
+                            (item.note?'<p>'+item.note+'</p>':'')+
+                        '</figcaption>';
+
+                    fig.addEventListener('click',()=>openLightbox(imgs,item.title,item.note||''));
+                    fig.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();openLightbox(imgs,item.title,item.note||'');}});
+                    grid.appendChild(fig);
+                });
+
+                sec.appendChild(grid);
+
+                if(catItems.length>INITIAL_SHOW){
+                    const wrap=document.createElement('div');
+                    wrap.className='show-more-wrap';
+                    const btn=document.createElement('button');
+                    btn.className='btn-show-more';
+                    const hidden=catItems.length-INITIAL_SHOW;
+                    btn.textContent='Show '+hidden+' more';
+                    btn.addEventListener('click',()=>{
+                        grid.querySelectorAll('.hidden-item').forEach(el=>{el.style.display='';});
+                        wrap.remove();
+                    });
+                    wrap.appendChild(btn);
+                    sec.appendChild(wrap);
+                }
+
+                root.appendChild(sec);
+                revealObs.observe(sec);
+            });
+        }catch(err){
+            root.innerHTML='<p class="load-status">Gallery unavailable.</p>';
+        }
+    }
+    loadGallery();
+
+    // ── Contact loader ──
+    fetch('/content/contact.json')
+        .then(r=>r.ok?r.json():null)
+        .then(d=>{
+            if(!d)return;
+            document.getElementById('c-phone').textContent=d.phone||'';
+            document.getElementById('c-email').textContent=d.email||'';
+            document.getElementById('c-address').textContent=d.address||'';
+            const wa=document.getElementById('c-whatsapp');
+            if(d.whatsapp)wa.href=d.whatsapp;
+        });
     </script>
 </body>
 </html>
