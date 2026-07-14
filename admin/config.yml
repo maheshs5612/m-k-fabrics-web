@@ -39,15 +39,7 @@ collections:
           - { label: "Other", value: "Other" }
         default: "Other"
       - { label: "Note", name: "note", widget: "text", required: false }
-      - label: "Images"
-        name: "images"
-        widget: "list"
-        label_singular: "Image"
-        min: 1
-        field:
-          label: "Image"
-          name: "image"
-          widget: "image"
+      - { label: "Image", name: "image", widget: "image" }
 
   - name: "site_settings"
     label: "Site Settings"
