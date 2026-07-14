@@ -211,6 +211,18 @@
         }
         .gallery-item:hover .model-badge{opacity:1;}
 
+        /* multi-image count badge */
+        .img-count-badge{
+            position:absolute;top:0.5rem;left:0.5rem;
+            background:rgba(0,0,0,0.55);
+            backdrop-filter:blur(4px);
+            color:#fff;
+            font-size:0.6rem;font-weight:700;letter-spacing:0.06em;
+            padding:0.22rem 0.55rem;border-radius:9999px;
+            display:flex;align-items:center;gap:0.3rem;
+            pointer-events:none;
+        }
+
         .gallery-item figcaption{padding:0.9rem 1rem 1rem;}
         .gallery-item h4{font-family:var(--font-display);font-size:var(--text-sm);font-weight:700;margin-bottom:0.2rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
         .gallery-item p{font-size:var(--text-xs);color:var(--color-text-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
@@ -433,6 +445,102 @@
         .autoplay-toggle:not(.playing) .pause-icon{display:none;}
         .autoplay-toggle:not(.playing) .play-icon{display:block;}
 
+        /* ── LIGHTBOX ───────────────────────────────────────────────────── */
+        .lb-overlay{
+            position:fixed;inset:0;z-index:900;
+            background:rgba(0,0,0,0.88);
+            backdrop-filter:blur(8px);
+            display:flex;align-items:center;justify-content:center;
+            opacity:0;pointer-events:none;
+            transition:opacity 0.25s ease;
+        }
+        .lb-overlay.open{opacity:1;pointer-events:all;}
+        .lb-inner{
+            position:relative;
+            width:min(90vw,880px);
+            max-height:90vh;
+            border-radius:1.5rem;
+            overflow:hidden;
+            background:var(--color-surface);
+            box-shadow:0 32px 80px rgba(0,0,0,0.5);
+            display:flex;flex-direction:column;
+        }
+        .lb-header{
+            display:flex;align-items:center;justify-content:space-between;
+            padding:0.85rem 1.25rem;
+            border-bottom:1px solid var(--color-divider);
+            flex-shrink:0;
+        }
+        .lb-title{font-family:var(--font-display);font-size:var(--text-sm);font-weight:700;}
+        .lb-counter{font-size:var(--text-xs);color:var(--color-text-muted);}
+        .lb-close{
+            width:36px;height:36px;border-radius:50%;
+            display:grid;place-items:center;
+            background:var(--color-surface-offset);
+            border:1px solid var(--color-border);
+            color:var(--color-text-muted);
+            transition:background var(--transition),color var(--transition);
+            flex-shrink:0;
+        }
+        .lb-close:hover{background:var(--color-primary);color:var(--color-text-inverse);}
+        .lb-stage{
+            position:relative;
+            flex:1;
+            min-height:0;
+            overflow:hidden;
+            background:#111;
+        }
+        .lb-track{
+            display:flex;
+            height:100%;
+            transition:transform 0.38s cubic-bezier(0.16,1,0.3,1);
+        }
+        .lb-slide{
+            flex:0 0 100%;
+            display:flex;align-items:center;justify-content:center;
+            max-height:72vh;
+        }
+        .lb-slide img{
+            max-width:100%;max-height:72vh;
+            object-fit:contain;
+            display:block;
+        }
+        .lb-arr{
+            position:absolute;top:50%;transform:translateY(-50%);
+            width:44px;height:44px;border-radius:50%;
+            background:rgba(255,255,255,0.15);
+            backdrop-filter:blur(6px);
+            border:1px solid rgba(255,255,255,0.2);
+            display:grid;place-items:center;
+            color:#fff;cursor:pointer;z-index:2;
+            transition:background 0.18s ease;
+        }
+        .lb-arr:hover{background:rgba(255,255,255,0.28);}
+        .lb-arr.prev{left:0.75rem;}
+        .lb-arr.next{right:0.75rem;}
+        .lb-dots{
+            display:flex;align-items:center;justify-content:center;gap:0.4rem;
+            padding:0.85rem 1rem;
+            flex-shrink:0;
+            background:var(--color-surface);
+            border-top:1px solid var(--color-divider);
+        }
+        .lb-dot{
+            width:8px;height:8px;border-radius:50%;
+            background:var(--color-border);
+            border:none;cursor:pointer;padding:0;
+            transition:background var(--transition),transform var(--transition);
+        }
+        .lb-dot.active{background:var(--color-primary);transform:scale(1.3);}
+        .lb-model-label{
+            position:absolute;top:0.75rem;right:0.75rem;
+            background:color-mix(in srgb,var(--color-primary) 88%,black);
+            color:var(--color-text-inverse);
+            font-size:0.58rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;
+            padding:0.28rem 0.6rem;border-radius:9999px;
+            z-index:3;pointer-events:none;
+        }
+
         @media(max-width:960px){
             .hero-grid,.contact-grid,.story-grid,.grid-3,.hero-facts{grid-template-columns:1fr;}
             .hero-visual{min-height:26rem;order:-1;}
@@ -454,15 +562,40 @@
             .slide-model-panel{min-height:340px;}
             .showcase-head{flex-direction:column;align-items:flex-start;}
             .showcase-head p{text-align:left;}
+            .lb-inner{width:min(96vw,880px);}
         }
         @media(prefers-reduced-motion:reduce){
             html{scroll-behavior:auto;}
             .reveal{opacity:1;transform:none;transition:none;}
             .fabric-img,.model-img{transition:none;}
+            .lb-track{transition:none;}
         }
     </style>
 </head>
 <body>
+    <!-- ── LIGHTBOX ──────────────────────────────────────────────────────── -->
+    <div class="lb-overlay" id="lb" role="dialog" aria-modal="true" aria-label="Image viewer">
+        <div class="lb-inner">
+            <div class="lb-header">
+                <span class="lb-title" id="lb-title"></span>
+                <span class="lb-counter" id="lb-counter"></span>
+                <button class="lb-close" id="lb-close" aria-label="Close image viewer">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6 6 18M6 6l12 12"/></svg>
+                </button>
+            </div>
+            <div class="lb-stage" id="lb-stage">
+                <div class="lb-track" id="lb-track"></div>
+                <button class="lb-arr prev" id="lb-prev" aria-label="Previous image">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 18l-6-6 6-6"/></svg>
+                </button>
+                <button class="lb-arr next" id="lb-next" aria-label="Next image">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg>
+                </button>
+            </div>
+            <div class="lb-dots" id="lb-dots"></div>
+        </div>
+    </div>
+
     <header class="header">
         <div class="container header-inner">
             <a class="brand" href="#home" aria-label="M K Fabrics home">
@@ -531,4 +664,313 @@
                     <div class="hero-facts">
                         <div><strong>30+ Years</strong><span>Trusted wholesale supplier since the 1990s.</span></div>
                         <div><strong>All Designs</strong><span>Extensive range across all fabric types and occasions.</span></div>
-                        <div><strong>P
+                        <div><strong>Pan India</strong><span>Supplying tailors, retailers &amp; brands across India.</span></div>
+                    </div>
+                </div>
+                <div class="hero-visual reveal">
+                    <div class="loom-lines" aria-hidden="true"></div>
+                    <div class="fabric-wave" aria-hidden="true"></div>
+                    <div class="swatch-card">
+                        <p style="font-size:var(--text-xs);color:var(--color-text-muted);text-transform:uppercase;letter-spacing:0.1em;">Season palette</p>
+                        <div class="swatches" aria-hidden="true">
+                            <span></span><span></span><span></span><span></span>
+                        </div>
+                        <p style="font-size:var(--text-xs);color:var(--color-text-muted);">Cotton · Linen · Silk blends</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- GALLERY -->
+        <section class="section" id="gallery">
+            <div class="container">
+                <div class="section-head reveal">
+                    <div>
+                        <span class="eyebrow">Gallery</span>
+                        <h2 style="margin-top:0.75rem;">Our fabric collection</h2>
+                    </div>
+                    <p>Click any item to browse all images. Hover to preview the model look.</p>
+                </div>
+                <div id="gallery-root" class="reveal"></div>
+                <p class="load-status" id="gallery-status" style="text-align:center;padding:2rem 0;">Loading gallery…</p>
+            </div>
+        </section>
+
+        <!-- LOCATION -->
+        <section class="section" id="location">
+            <div class="container">
+                <div class="section-head reveal">
+                    <div>
+                        <span class="eyebrow">Location</span>
+                        <h2 style="margin-top:0.75rem;">Visit our showroom</h2>
+                    </div>
+                </div>
+                <div class="contact-grid reveal">
+                    <div class="card">
+                        <div class="icon-chip" aria-hidden="true">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                        </div>
+                        <h3>Address</h3>
+                        <ul class="contact-list">
+                            <li>
+                                <span class="contact-label">Shop</span>
+                                <span>M K Fabrics, Hauz Qazi Chowk, Chandni Chowk, Delhi – 110006</span>
+                            </li>
+                            <li>
+                                <span class="contact-label">Phone</span>
+                                <a href="tel:+919810366779">+91 98103 66779</a>
+                            </li>
+                            <li>
+                                <span class="contact-label">WhatsApp</span>
+                                <a href="https://wa.me/919810366779" target="_blank" rel="noopener noreferrer">Chat with us</a>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="map-card">
+                        <iframe
+                            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3500.96!2d77.2269!3d28.6562!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x390cfd5b8c6b6b6b%3A0x0!2sChandni%20Chowk!5e0!3m2!1sen!2sin!4v1"
+                            allowfullscreen loading="lazy" referrerpolicy="no-referrer-when-downgrade"
+                            title="M K Fabrics location map"
+                        ></iframe>
+                        <a class="map-open-link" href="https://maps.google.com/?q=Hauz+Qazi+Chowk,+Chandni+Chowk,+Delhi" target="_blank" rel="noopener noreferrer">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                            Open in Google Maps
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div class="container footer-inner">
+            <span>&copy; 2025 M K Fabrics. All rights reserved.</span>
+            <a href="https://wa.me/919810366779" target="_blank" rel="noopener noreferrer" style="color:var(--color-primary);font-weight:600;">WhatsApp us</a>
+        </div>
+    </footer>
+
+    <a class="whatsapp-float" href="https://wa.me/919810366779?text=Hello%20M%20K%20Fabrics%2C%20I%20want%20to%20know%20more%20about%20your%20fabric%20collection." target="_blank" rel="noopener noreferrer" aria-label="Chat on WhatsApp">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/></svg>
+    </a>
+
+    <script>
+    // ── THEME TOGGLE ──────────────────────────────────────────────────────
+    (function(){
+        const t=document.querySelector('[data-theme-toggle]'),r=document.documentElement;
+        let d=matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light';
+        r.setAttribute('data-theme',d);
+        const sun='<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>';
+        const moon='<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>';
+        if(t){t.innerHTML=d==='dark'?sun:moon;t.addEventListener('click',()=>{d=d==='dark'?'light':'dark';r.setAttribute('data-theme',d);t.innerHTML=d==='dark'?sun:moon;t.setAttribute('aria-label','Switch to '+(d==='dark'?'light':'dark')+' mode');});}
+    })();
+
+    // ── MOBILE MENU ───────────────────────────────────────────────────────
+    (function(){
+        const btn=document.querySelector('[data-menu-toggle]'),nav=document.getElementById('site-nav');
+        if(!btn||!nav)return;
+        btn.addEventListener('click',()=>{
+            const open=nav.classList.toggle('open');
+            btn.setAttribute('aria-expanded',open);
+        });
+        nav.querySelectorAll('a').forEach(a=>a.addEventListener('click',()=>{
+            nav.classList.remove('open');btn.setAttribute('aria-expanded','false');
+        }));
+    })();
+
+    // ── SCROLL REVEAL ─────────────────────────────────────────────────────
+    (function(){
+        const obs=new IntersectionObserver(entries=>entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('is-visible');obs.unobserve(e.target);}}),{threshold:0.12});
+        document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
+    })();
+
+    // ── LIGHTBOX ──────────────────────────────────────────────────────────
+    const LB = (function(){
+        const overlay = document.getElementById('lb');
+        const track   = document.getElementById('lb-track');
+        const dots    = document.getElementById('lb-dots');
+        const titleEl = document.getElementById('lb-title');
+        const counter = document.getElementById('lb-counter');
+        const btnClose= document.getElementById('lb-close');
+        const btnPrev = document.getElementById('lb-prev');
+        const btnNext = document.getElementById('lb-next');
+        let images=[], current=0, total=0;
+
+        function buildSlides(imgs, modelImg, title){
+            track.innerHTML='';
+            dots.innerHTML='';
+            images = imgs.slice();
+            if(modelImg) images.push({src: modelImg, isModel: true});
+            total = images.length;
+            images.forEach((img,i)=>{
+                const src  = typeof img==='string'? img : img.src;
+                const isM  = typeof img==='object' && img.isModel;
+                const div  = document.createElement('div');
+                div.className='lb-slide';
+                div.innerHTML=`<img src="${src}" alt="${title} — image ${i+1}" loading="lazy">`;
+                if(isM){
+                    const badge=document.createElement('span');
+                    badge.className='lb-model-label';
+                    badge.textContent='AI Model';
+                    div.style.position='relative';
+                    div.appendChild(badge);
+                }
+                track.appendChild(div);
+                const dot=document.createElement('button');
+                dot.className='lb-dot';
+                dot.setAttribute('aria-label',`View image ${i+1}`);
+                dot.addEventListener('click',()=>goTo(i));
+                dots.appendChild(dot);
+            });
+            titleEl.textContent = title;
+        }
+
+        function goTo(idx){
+            current = (idx+total)%total;
+            track.style.transform=`translateX(-${current*100}%)`;
+            counter.textContent=`${current+1} / ${total}`;
+            dots.querySelectorAll('.lb-dot').forEach((d,i)=>d.classList.toggle('active',i===current));
+            btnPrev.style.display = total<=1?'none':'';
+            btnNext.style.display = total<=1?'none':'';
+        }
+
+        function open(imgs, modelImg, title){
+            buildSlides(imgs, modelImg, title);
+            overlay.classList.add('open');
+            document.body.style.overflow='hidden';
+            goTo(0);
+        }
+
+        function close(){
+            overlay.classList.remove('open');
+            document.body.style.overflow='';
+        }
+
+        btnClose.addEventListener('click', close);
+        overlay.addEventListener('click', e=>{ if(e.target===overlay) close(); });
+        btnPrev.addEventListener('click', ()=>goTo(current-1));
+        btnNext.addEventListener('click', ()=>goTo(current+1));
+
+        // Keyboard navigation
+        document.addEventListener('keydown', e=>{
+            if(!overlay.classList.contains('open')) return;
+            if(e.key==='Escape') close();
+            if(e.key==='ArrowLeft') goTo(current-1);
+            if(e.key==='ArrowRight') goTo(current+1);
+        });
+
+        // Touch/swipe support
+        let touchStartX=0;
+        overlay.addEventListener('touchstart', e=>{ touchStartX=e.touches[0].clientX; }, {passive:true});
+        overlay.addEventListener('touchend', e=>{
+            const dx = e.changedTouches[0].clientX - touchStartX;
+            if(Math.abs(dx)>50){ dx<0 ? goTo(current+1) : goTo(current-1); }
+        }, {passive:true});
+
+        return { open };
+    })();
+
+    // ── GALLERY LOADER ────────────────────────────────────────────────────
+    (async function(){
+        const root   = document.getElementById('gallery-root');
+        const status = document.getElementById('gallery-status');
+
+        // Fetch all gallery items from the API
+        let items = [];
+        try {
+            const res = await fetch('/api/gallery');
+            if (!res.ok) throw new Error('API error');
+            items = await res.json();
+        } catch(e) {
+            // Fallback: try fetching individual known JSON files
+            status.textContent = 'Could not load gallery.';
+            return;
+        }
+
+        if (!items.length) { status.textContent = 'No items yet.'; return; }
+        status.style.display = 'none';
+
+        // Group by category
+        const cats = {};
+        items.forEach(item=>{
+            const cat = item.category || 'Other';
+            if(!cats[cat]) cats[cat]=[];
+            cats[cat].push(item);
+        });
+
+        const INITIAL_SHOW = 8;
+
+        Object.entries(cats).forEach(([cat, list])=>{
+            const sec = document.createElement('div');
+            sec.className = 'gallery-section reveal';
+
+            const hdr = document.createElement('div');
+            hdr.className = 'gallery-category-header';
+            hdr.innerHTML = `<h3>${cat}</h3>`;
+            sec.appendChild(hdr);
+
+            const grid = document.createElement('div');
+            grid.className = 'gallery-grid';
+
+            list.forEach((item, idx)=>{
+                const images    = item.images || [item.image];
+                const modelImg  = item.modelImage || null;
+                const thumb     = item.thumbnail || images[0];
+                const allCount  = images.length + (modelImg ? 1 : 0);
+
+                const fig = document.createElement('figure');
+                fig.className = 'gallery-item';
+                if(idx >= INITIAL_SHOW) fig.style.display='none';
+
+                fig.innerHTML = `
+                    <div class="img-wrap">
+                        <img class="img-fabric" src="${thumb}" alt="${item.title}" width="400" height="400" loading="lazy">
+                        ${modelImg ? `<img class="img-model" src="${modelImg}" alt="${item.title} — model view" width="400" height="400" loading="lazy">` : ''}
+                        ${allCount > 1 ? `<span class="img-count-badge"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>${allCount} photos</span>` : ''}
+                        ${modelImg ? `<span class="model-badge">Model view</span>` : ''}
+                    </div>
+                    <figcaption>
+                        <h4>${item.title}</h4>
+                        <p>${item.category}${item.note ? ' · ' + item.note : ''}</p>
+                    </figcaption>
+                `;
+
+                fig.addEventListener('click', ()=>{
+                    LB.open(images, modelImg, item.title);
+                });
+
+                grid.appendChild(fig);
+            });
+
+            sec.appendChild(grid);
+
+            if(list.length > INITIAL_SHOW){
+                const wrap = document.createElement('div');
+                wrap.className = 'show-more-wrap';
+                const btn = document.createElement('button');
+                btn.className = 'btn-show-more';
+                let expanded = false;
+                const hidden = list.length - INITIAL_SHOW;
+                btn.textContent = `Show ${hidden} more`;
+                btn.addEventListener('click', ()=>{
+                    expanded = !expanded;
+                    grid.querySelectorAll('.gallery-item').forEach((el,i)=>{
+                        if(i>=INITIAL_SHOW) el.style.display = expanded?'':'none';
+                    });
+                    btn.textContent = expanded ? 'Show less' : `Show ${hidden} more`;
+                });
+                wrap.appendChild(btn);
+                sec.appendChild(wrap);
+            }
+
+            root.appendChild(sec);
+        });
+
+        // Re-run reveal observer for dynamically added elements
+        const obs = new IntersectionObserver(entries=>entries.forEach(e=>{
+            if(e.isIntersecting){e.target.classList.add('is-visible');obs.unobserve(e.target);}
+        }),{threshold:0.1});
+        root.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
+    })();
+    </script>
+</body>
+</html>
