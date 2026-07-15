@@ -824,36 +824,35 @@
         const btnNext = document.getElementById('lb-next');
         let images=[], current=0, total=0;
 
-        function buildSlides(imgs, title){
+        function buildSlides(imgs, modelImg, title){
             track.innerHTML='';
             dots.innerHTML='';
-            images = imgs.slice();
-            total = images.length * 2; // each source yields a fabric + model mockup slide
-            let idxCounter = 0;
-            images.forEach((imgSrc, i)=>{
-                const src = typeof imgSrc==='string'? imgSrc : (imgSrc.src || imgSrc);
-                // Fabric slide
-                const divF = document.createElement('div');
-                divF.className='lb-slide';
-                divF.innerHTML = `<div class="slide"><div class="slide-fabric-panel"><img class="fabric-img" src="${src}" alt="${title} — fabric ${i+1}" loading="lazy"></div><div class="slide-model-panel" style="background-image:url('${src}')"></div></div>`;
-                track.appendChild(divF);
-                const dotF = document.createElement('button');
-                dotF.className='lb-dot';
-                dotF.setAttribute('aria-label',`View fabric ${i+1}`);
-                dotF.addEventListener('click',()=>goTo(idxCounter));
-                dots.appendChild(dotF);
-                idxCounter++;
-                // Model mockup slide
-                const divM = document.createElement('div');
-                divM.className='lb-slide';
-                divM.innerHTML = `<div class="slide"><div class="slide-fabric-panel"><img class="fabric-img" src="${src}" alt="${title} — fabric ${i+1}" loading="lazy"></div><div class="slide-model-panel" style="background-image:url('${src}')"></div></div>`;
-                track.appendChild(divM);
-                const dotM = document.createElement('button');
-                dotM.className='lb-dot';
-                dotM.setAttribute('aria-label',`View model ${i+1}`);
-                dotM.addEventListener('click',()=>goTo(idxCounter));
-                dots.appendChild(dotM);
-                idxCounter++;
+            const srcs = imgs.slice();
+            const slides = [];
+            srcs.forEach(s=>{ const src = typeof s==='string'?s:(s.src||s); slides.push({type:'fabric', src}); });
+            // add a single model slide at the end (either real modelImage or a masked mockup using first fabric)
+            if(modelImg){ slides.push({type:'model', src: modelImg}); }
+            else if(srcs.length){ slides.push({type:'mockup', src: (typeof srcs[0]==='string'?srcs[0]:(srcs[0].src||srcs[0]))}); }
+
+            images = slides; // store slide descriptors
+            total = images.length;
+
+            images.forEach((s,i)=>{
+                const div = document.createElement('div');
+                div.className='lb-slide';
+                if(s.type==='fabric'){
+                    div.innerHTML = `<div class="slide"><div class="slide-fabric-panel"><img class="fabric-img" src="${s.src}" alt="${title} — image ${i+1}" loading="lazy"></div></div>`;
+                } else if(s.type==='model'){
+                    div.innerHTML = `<div class="slide"><div class="slide-fabric-panel"><img class="fabric-img" src="${s.src}" alt="${title} — model" loading="lazy"></div></div>`;
+                } else { // mockup - show masked mockup using background-image
+                    div.innerHTML = `<div class="slide"><div class="slide-fabric-panel"><img class="fabric-img" src="${s.src}" alt="${title} — fabric" loading="lazy"></div><div class="slide-model-panel" style="background-image:url('${s.src}')"></div></div>`;
+                }
+                track.appendChild(div);
+                const dot=document.createElement('button');
+                dot.className='lb-dot';
+                dot.setAttribute('aria-label',`View image ${i+1}`);
+                dot.addEventListener('click',()=>goTo(i));
+                dots.appendChild(dot);
             });
             titleEl.textContent = title;
         }
@@ -867,8 +866,8 @@
             btnNext.style.display = total<=1?'none':'';
         }
 
-        function open(imgs, title){
-            buildSlides(imgs, title);
+        function open(imgs, modelImg, title){
+            buildSlides(imgs, modelImg, title);
             overlay.classList.add('open');
             document.body.style.overflow='hidden';
             goTo(0);
@@ -954,21 +953,11 @@
             const grid = document.createElement('div');
             grid.className = 'gallery-grid';
 
-            // Deduplicate items by their primary image to avoid repeated thumbnails
-            const seenThumbs = new Set();
-            const uniqueList = [];
-            list.forEach(it=>{
-                const primary = (it.images && it.images[0]) || it.image || it.thumbnail;
-                const key = typeof primary === 'string' ? primary : (primary && (primary.src || primary.fabric)) || JSON.stringify(primary);
-                if(seenThumbs.has(key)) return;
-                seenThumbs.add(key);
-                uniqueList.push(it);
-            });
-
-            uniqueList.forEach((item, idx)=>{
+            list.forEach((item, idx)=>{
                 const images    = item.images || [item.image];
                 const thumb     = item.thumbnail || (typeof images[0] === 'string' ? images[0] : (images[0] && (images[0].src || images[0].fabric)));
-                const allCount  = images.length * 2;
+                const modelBg   = item.modelImage || null;
+                const allCount  = images.length + 1; // fabric images + one model/mockup slide
 
                 const fig = document.createElement('figure');
                 fig.className = 'gallery-item';
@@ -977,7 +966,7 @@
                 fig.innerHTML = `
                     <div class="img-wrap">
                         <img class="img-fabric" src="${thumb}" alt="${item.title}" width="400" height="400" loading="lazy">
-                        <div class="img-model" aria-hidden="true" style="background-image:url('${thumb}')"></div>
+                        <div class="img-model" aria-hidden="true" style="background-image:url('${modelBg ? modelBg : thumb}')"></div>
                         ${allCount > 1 ? `<span class="img-count-badge"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>${allCount} photos</span>` : ''}
                         <span class="model-badge">Model view</span>
                     </div>
@@ -988,7 +977,7 @@
                 `;
 
                 fig.addEventListener('click', ()=>{
-                    LB.open(images, item.title);
+                    LB.open(images, modelBg, item.title);
                 });
 
                 grid.appendChild(fig);
@@ -996,13 +985,13 @@
 
             sec.appendChild(grid);
 
-            if(uniqueList.length > INITIAL_SHOW){
+            if(list.length > INITIAL_SHOW){
                 const wrap = document.createElement('div');
                 wrap.className = 'show-more-wrap';
                 const btn = document.createElement('button');
                 btn.className = 'btn-show-more';
                 let expanded = false;
-                const hidden = uniqueList.length - INITIAL_SHOW;
+                const hidden = list.length - INITIAL_SHOW;
                 btn.textContent = `Show ${hidden} more`;
                 btn.addEventListener('click', ()=>{
                     expanded = !expanded;
