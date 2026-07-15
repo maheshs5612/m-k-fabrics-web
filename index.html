@@ -189,13 +189,13 @@
         }
         .gallery-item:hover{box-shadow:var(--shadow-md);transform:translateY(-3px);}
         .gallery-item .img-wrap{width:100%;aspect-ratio:1/1;overflow:hidden;background:var(--color-surface-offset);position:relative;}
-        .gallery-item .img-wrap img{width:100%;height:100%;object-fit:cover;object-position:center;transition:opacity 0.4s ease,transform 0.4s ease;}
+        .gallery-item .img-wrap img{width:100%;height:100%;object-fit:cover;object-position:center top;transition:opacity 0.4s ease,transform 0.4s ease;}
         .gallery-item:hover .img-wrap img{transform:scale(1.04);}
 
         /* dual-image flip on hover — fabric <-> model (masked mockup) */
         .gallery-item .img-model{
             position:absolute;inset:0;width:100%;height:100%;
-            background-size:cover;background-position:center;
+            background-size:cover;background-position:center top;
             --mock-mask-scale:120%;
             --mock-mask-y:18%;
             /* refined mannequin SVG mask */
@@ -529,11 +529,12 @@
             display:flex;align-items:center;justify-content:center;
             max-height:72vh;
         }
-        .lb-slide img{
-            max-width:100%;max-height:72vh;
-            object-fit:contain;
-            display:block;
-        }
+        /* support for paired fabric + model mockup slides inside the lightbox */
+        .lb-slide .slide{display:grid;grid-template-columns:1fr 1fr;width:100%;height:100%;align-items:stretch}
+        .lb-slide .slide-fabric-panel,.lb-slide .slide-model-panel{position:relative;height:100%;overflow:hidden}
+        .lb-slide img{max-width:100%;max-height:72vh;object-fit:contain;display:block}
+        .lb-slide .fabric-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center top}
+        .lb-arr{position:absolute;top:50%;transform:translateY(-50%);width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,0.15);backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,0.2);display:grid;place-items:center;color:#fff;cursor:pointer;z-index:2;transition:background 0.18s ease;}
         .lb-arr{
             position:absolute;top:50%;transform:translateY(-50%);
             width:44px;height:44px;border-radius:50%;
@@ -953,7 +954,18 @@
             const grid = document.createElement('div');
             grid.className = 'gallery-grid';
 
-            list.forEach((item, idx)=>{
+            // Deduplicate items by their primary image to avoid repeated thumbnails
+            const seenThumbs = new Set();
+            const uniqueList = [];
+            list.forEach(it=>{
+                const primary = (it.images && it.images[0]) || it.image || it.thumbnail;
+                const key = typeof primary === 'string' ? primary : (primary && (primary.src || primary.fabric)) || JSON.stringify(primary);
+                if(seenThumbs.has(key)) return;
+                seenThumbs.add(key);
+                uniqueList.push(it);
+            });
+
+            uniqueList.forEach((item, idx)=>{
                 const images    = item.images || [item.image];
                 const thumb     = item.thumbnail || (typeof images[0] === 'string' ? images[0] : (images[0] && (images[0].src || images[0].fabric)));
                 const allCount  = images.length * 2;
@@ -984,13 +996,13 @@
 
             sec.appendChild(grid);
 
-            if(list.length > INITIAL_SHOW){
+            if(uniqueList.length > INITIAL_SHOW){
                 const wrap = document.createElement('div');
                 wrap.className = 'show-more-wrap';
                 const btn = document.createElement('button');
                 btn.className = 'btn-show-more';
                 let expanded = false;
-                const hidden = list.length - INITIAL_SHOW;
+                const hidden = uniqueList.length - INITIAL_SHOW;
                 btn.textContent = `Show ${hidden} more`;
                 btn.addEventListener('click', ()=>{
                     expanded = !expanded;
