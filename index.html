@@ -192,10 +192,18 @@
         .gallery-item .img-wrap img{width:100%;height:100%;object-fit:cover;object-position:center;transition:opacity 0.4s ease,transform 0.4s ease;}
         .gallery-item:hover .img-wrap img{transform:scale(1.04);}
 
-        /* dual-image flip on hover — fabric <-> model */
+        /* dual-image flip on hover — fabric <-> model (masked mockup) */
         .gallery-item .img-model{
             position:absolute;inset:0;width:100%;height:100%;
-            object-fit:cover;object-position:top;
+            background-size:cover;background-position:center;
+            --mock-mask-scale:120%;
+            --mock-mask-y:18%;
+            /* refined mannequin SVG mask */
+            -webkit-mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 300'><circle cx='100' cy='60' r='34' fill='black'/><path d='M60 110 C60 140 75 155 100 155 C125 155 140 140 140 110 L140 220 C140 250 60 250 60 220 Z' fill='black'/></svg>");
+            mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 300'><circle cx='100' cy='60' r='34' fill='black'/><path d='M60 110 C60 140 75 155 100 155 C125 155 140 140 140 110 L140 220 C140 250 60 250 60 220 Z' fill='black'/></svg>");
+            -webkit-mask-size:var(--mock-mask-scale);mask-size:var(--mock-mask-scale);
+            -webkit-mask-position:50% var(--mock-mask-y);mask-position:50% var(--mock-mask-y);
+            -webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;
             opacity:0;transition:opacity 0.45s ease;
         }
         .gallery-item:hover .img-model{opacity:1;}
@@ -329,6 +337,19 @@
             opacity:0;transition:opacity 0.7s ease;
         }
         .fabric-img.active{opacity:1;}
+
+        /* Right panel: mannequin mockup using the same fabric as background mask (tweakable) */
+        .slide-model-panel{
+            position:relative;overflow:hidden;background:#f3f1ee;
+            --mock-mask-scale:120%;
+            --mock-mask-y:18%;
+            -webkit-mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 300'><circle cx='100' cy='60' r='34' fill='black'/><path d='M60 110 C60 140 75 155 100 155 C125 155 140 140 140 110 L140 220 C140 250 60 250 60 220 Z' fill='black'/></svg>");
+            mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 300'><circle cx='100' cy='60' r='34' fill='black'/><path d='M60 110 C60 140 75 155 100 155 C125 155 140 140 140 110 L140 220 C140 250 60 250 60 220 Z' fill='black'/></svg>");
+            -webkit-mask-size:var(--mock-mask-scale);mask-size:var(--mock-mask-scale);
+            -webkit-mask-position:50% var(--mock-mask-y);mask-position:50% var(--mock-mask-y);
+            -webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;
+            background-size:cover;background-position:center;
+        }
         .panel-label{
             position:absolute;top:1rem;left:1rem;
             background:color-mix(in srgb,black 55%,transparent);
@@ -338,9 +359,17 @@
             padding:0.3rem 0.7rem;border-radius:9999px;z-index:3;
         }
 
-        /* Right panel: model wearing it */
+        /* Right panel: model wearing it (masked mockup) */
         .slide-model-panel{
             position:relative;overflow:hidden;background:#f0ece6;
+            --mock-mask-scale:120%;
+            --mock-mask-y:18%;
+            -webkit-mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 300'><circle cx='100' cy='60' r='34' fill='black'/><path d='M60 110 C60 140 75 155 100 155 C125 155 140 140 140 110 L140 220 C140 250 60 250 60 220 Z' fill='black'/></svg>");
+            mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 300'><circle cx='100' cy='60' r='34' fill='black'/><path d='M60 110 C60 140 75 155 100 155 C125 155 140 140 140 110 L140 220 C140 250 60 250 60 220 Z' fill='black'/></svg>");
+            -webkit-mask-size:var(--mock-mask-scale);mask-size:var(--mock-mask-scale);
+            -webkit-mask-position:50% var(--mock-mask-y);mask-position:50% var(--mock-mask-y);
+            -webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;
+            background-size:cover;background-position:center;
         }
         .model-img{
             position:absolute;inset:0;width:100%;height:100%;
@@ -728,11 +757,10 @@
                     </div>
                     <div class="map-card">
                         <iframe
-                            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3500.96!2d77.2269!3d28.6562!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x390cfd5b8c6b6b6b%3A0x0!2sChandni%20Chowk!5e0!3m2!1sen!2sin!4v1"
-                            allowfullscreen loading="lazy" referrerpolicy="no-referrer-when-downgrade"
-                            title="M K Fabrics location map"
+                            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3505.410372880486!2d77.2599273!3d28.5273825!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x390ce12dadbdd6b9%3A0x9c9c976de19d076d!2sM.K%20FABRICS%20%7C%20Fabric%20Wholesaler%20-%20Poplin%20%7C%20Yarn%20Dyed%20%7C%20Rayon%20%7C%20Viscose%20%7C%20Modal%20%7C%20Cambric!5e0!3m2!1sen!2sin!4v1784109107169!5m2!1sen!2sin"
+                            width="800" height="600" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" title="M K Fabrics location map"
                         ></iframe>
-                        <a class="map-open-link" href="https://maps.google.com/?q=Hauz+Qazi+Chowk,+Chandni+Chowk,+Delhi" target="_blank" rel="noopener noreferrer">
+                        <a class="map-open-link" href="https://www.google.com/maps/dir/?api=1&destination=28.5273825,77.2599273" target="_blank" rel="noopener noreferrer">
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
                             Open in Google Maps
                         </a>
@@ -795,31 +823,36 @@
         const btnNext = document.getElementById('lb-next');
         let images=[], current=0, total=0;
 
-        function buildSlides(imgs, modelImg, title){
+        function buildSlides(imgs, title){
             track.innerHTML='';
             dots.innerHTML='';
             images = imgs.slice();
-            if(modelImg) images.push({src: modelImg, isModel: true});
-            total = images.length;
-            images.forEach((img,i)=>{
-                const src  = typeof img==='string'? img : img.src;
-                const isM  = typeof img==='object' && img.isModel;
-                const div  = document.createElement('div');
-                div.className='lb-slide';
-                div.innerHTML=`<img src="${src}" alt="${title} — image ${i+1}" loading="lazy">`;
-                if(isM){
-                    const badge=document.createElement('span');
-                    badge.className='lb-model-label';
-                    badge.textContent='AI Model';
-                    div.style.position='relative';
-                    div.appendChild(badge);
-                }
-                track.appendChild(div);
-                const dot=document.createElement('button');
-                dot.className='lb-dot';
-                dot.setAttribute('aria-label',`View image ${i+1}`);
-                dot.addEventListener('click',()=>goTo(i));
-                dots.appendChild(dot);
+            total = images.length * 2; // each source yields a fabric + model mockup slide
+            let idxCounter = 0;
+            images.forEach((imgSrc, i)=>{
+                const src = typeof imgSrc==='string'? imgSrc : (imgSrc.src || imgSrc);
+                // Fabric slide
+                const divF = document.createElement('div');
+                divF.className='lb-slide';
+                divF.innerHTML = `<div class="slide"><div class="slide-fabric-panel"><img class="fabric-img" src="${src}" alt="${title} — fabric ${i+1}" loading="lazy"></div><div class="slide-model-panel" style="background-image:url('${src}')"></div></div>`;
+                track.appendChild(divF);
+                const dotF = document.createElement('button');
+                dotF.className='lb-dot';
+                dotF.setAttribute('aria-label',`View fabric ${i+1}`);
+                dotF.addEventListener('click',()=>goTo(idxCounter));
+                dots.appendChild(dotF);
+                idxCounter++;
+                // Model mockup slide
+                const divM = document.createElement('div');
+                divM.className='lb-slide';
+                divM.innerHTML = `<div class="slide"><div class="slide-fabric-panel"><img class="fabric-img" src="${src}" alt="${title} — fabric ${i+1}" loading="lazy"></div><div class="slide-model-panel" style="background-image:url('${src}')"></div></div>`;
+                track.appendChild(divM);
+                const dotM = document.createElement('button');
+                dotM.className='lb-dot';
+                dotM.setAttribute('aria-label',`View model ${i+1}`);
+                dotM.addEventListener('click',()=>goTo(idxCounter));
+                dots.appendChild(dotM);
+                idxCounter++;
             });
             titleEl.textContent = title;
         }
@@ -833,8 +866,8 @@
             btnNext.style.display = total<=1?'none':'';
         }
 
-        function open(imgs, modelImg, title){
-            buildSlides(imgs, modelImg, title);
+        function open(imgs, title){
+            buildSlides(imgs, title);
             overlay.classList.add('open');
             document.body.style.overflow='hidden';
             goTo(0);
@@ -913,9 +946,8 @@
 
             list.forEach((item, idx)=>{
                 const images    = item.images || [item.image];
-                const modelImg  = item.modelImage || null;
-                const thumb     = item.thumbnail || images[0];
-                const allCount  = images.length + (modelImg ? 1 : 0);
+                const thumb     = item.thumbnail || (typeof images[0] === 'string' ? images[0] : (images[0] && (images[0].src || images[0].fabric)));
+                const allCount  = images.length * 2;
 
                 const fig = document.createElement('figure');
                 fig.className = 'gallery-item';
@@ -924,9 +956,9 @@
                 fig.innerHTML = `
                     <div class="img-wrap">
                         <img class="img-fabric" src="${thumb}" alt="${item.title}" width="400" height="400" loading="lazy">
-                        ${modelImg ? `<img class="img-model" src="${modelImg}" alt="${item.title} — model view" width="400" height="400" loading="lazy">` : ''}
+                        <div class="img-model" aria-hidden="true" style="background-image:url('${thumb}')"></div>
                         ${allCount > 1 ? `<span class="img-count-badge"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>${allCount} photos</span>` : ''}
-                        ${modelImg ? `<span class="model-badge">Model view</span>` : ''}
+                        <span class="model-badge">Model view</span>
                     </div>
                     <figcaption>
                         <h4>${item.title}</h4>
@@ -935,7 +967,7 @@
                 `;
 
                 fig.addEventListener('click', ()=>{
-                    LB.open(images, modelImg, item.title);
+                    LB.open(images, item.title);
                 });
 
                 grid.appendChild(fig);
