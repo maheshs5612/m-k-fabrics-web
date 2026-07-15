@@ -743,7 +743,7 @@
                         <ul class="contact-list">
                             <li>
                                 <span class="contact-label">Shop</span>
-                                <span>M K Fabrics, Hauz Qazi Chowk, Chandni Chowk, Delhi – 110006</span>
+                                <span>Ground Floor, TA-246, in front of Everest Apartments, Kalkaji Extension, Block A 3, Tughlakabad Extension, Kalkaji, New Delhi, Delhi 110019</span>
                             </li>
                             <li>
                                 <span class="contact-label">Phone</span>
@@ -907,19 +907,28 @@
         const root   = document.getElementById('gallery-root');
         const status = document.getElementById('gallery-status');
 
-        // Fetch all gallery items from the API
+        // Fetch all gallery items from the API, fallback to static content files when not available
         let items = [];
         try {
             const res = await fetch('/api/gallery');
             if (!res.ok) throw new Error('API error');
             items = await res.json();
         } catch(e) {
-            // Fallback: try fetching individual known JSON files
-            status.textContent = 'Could not load gallery.';
-            return;
+            // Fallback to static content index (used in local/static previews and when CMS API isn't available)
+            try {
+                const idxRes = await fetch('/content/gallery/index.json');
+                if (!idxRes.ok) throw new Error('index.json missing');
+                const files = await idxRes.json();
+                const loads = files.map(f => fetch('/content/gallery/' + f).then(r => r.ok ? r.json() : null));
+                const loaded = await Promise.all(loads);
+                items = loaded.filter(Boolean);
+            } catch(err) {
+                status.textContent = 'Could not load gallery.';
+                return;
+            }
         }
 
-        if (!items.length) { status.textContent = 'No items yet.'; return; }
+        if (!items || !items.length) { status.textContent = 'No items yet.'; return; }
         status.style.display = 'none';
 
         // Group by category
