@@ -1,6 +1,7 @@
-{
-  "category": "Yarn Dyed",
-  "image": "/uploads/3-yarn-dyed.jpeg",
-  "title": "Stripe Yarn-Dyed",
-  "note": "54\""
+﻿{
+    "category":  "Yarn Dyed",
+    "image":  "/uploads/3-yarn-dyed.jpeg",
+    "title":  "Stripe Yarn-Dyed",
+    "note":  "54\"",
+    "modelImage":  "/uploads/model-yarn-3.png"
 }

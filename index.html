@@ -192,19 +192,10 @@
         .gallery-item .img-wrap img{width:100%;height:100%;object-fit:cover;object-position:center top;transition:opacity 0.4s ease,transform 0.4s ease;}
         .gallery-item:hover .img-wrap img{transform:scale(1.04);}
 
-        /* dual-image flip on hover — fabric <-> model (masked mockup) */
+        /* dual-image flip on hover — fabric <-> model (use supplied model photos only) */
         .gallery-item .img-model{
             position:absolute;inset:0;width:100%;height:100%;
-            background-size:cover;background-position:center top;
-            --mock-mask-scale:120%;
-            --mock-mask-y:18%;
-            /* refined mannequin SVG mask */
-            -webkit-mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 300'><circle cx='100' cy='60' r='34' fill='black'/><path d='M60 110 C60 140 75 155 100 155 C125 155 140 140 140 110 L140 220 C140 250 60 250 60 220 Z' fill='black'/></svg>");
-            mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 300'><circle cx='100' cy='60' r='34' fill='black'/><path d='M60 110 C60 140 75 155 100 155 C125 155 140 140 140 110 L140 220 C140 250 60 250 60 220 Z' fill='black'/></svg>");
-            -webkit-mask-size:var(--mock-mask-scale);mask-size:var(--mock-mask-scale);
-            -webkit-mask-position:50% var(--mock-mask-y);mask-position:50% var(--mock-mask-y);
-            -webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;
-            opacity:0;transition:opacity 0.45s ease;
+            object-fit:cover;object-position:center top;display:block;opacity:0;transition:opacity 0.45s ease;
         }
         .gallery-item:hover .img-model{opacity:1;}
         .gallery-item:hover .img-wrap .img-fabric{opacity:0;}
@@ -338,16 +329,9 @@
         }
         .fabric-img.active{opacity:1;}
 
-        /* Right panel: mannequin mockup using the same fabric as background mask (tweakable) */
+        /* Right panel: model slide (show real model photos if provided) */
         .slide-model-panel{
-            position:relative;overflow:hidden;background:#f3f1ee;
-            --mock-mask-scale:120%;
-            --mock-mask-y:18%;
-            -webkit-mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 300'><circle cx='100' cy='60' r='34' fill='black'/><path d='M60 110 C60 140 75 155 100 155 C125 155 140 140 140 110 L140 220 C140 250 60 250 60 220 Z' fill='black'/></svg>");
-            mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 300'><circle cx='100' cy='60' r='34' fill='black'/><path d='M60 110 C60 140 75 155 100 155 C125 155 140 140 140 110 L140 220 C140 250 60 250 60 220 Z' fill='black'/></svg>");
-            -webkit-mask-size:var(--mock-mask-scale);mask-size:var(--mock-mask-scale);
-            -webkit-mask-position:50% var(--mock-mask-y);mask-position:50% var(--mock-mask-y);
-            -webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;
+            position:relative;overflow:hidden;background:#f0ece6;
             background-size:cover;background-position:center;
         }
         .panel-label{
@@ -358,22 +342,9 @@
             letter-spacing:0.12em;text-transform:uppercase;
             padding:0.3rem 0.7rem;border-radius:9999px;z-index:3;
         }
-
-        /* Right panel: model wearing it (masked mockup) */
-        .slide-model-panel{
-            position:relative;overflow:hidden;background:#f0ece6;
-            --mock-mask-scale:120%;
-            --mock-mask-y:18%;
-            -webkit-mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 300'><circle cx='100' cy='60' r='34' fill='black'/><path d='M60 110 C60 140 75 155 100 155 C125 155 140 140 140 110 L140 220 C140 250 60 250 60 220 Z' fill='black'/></svg>");
-            mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 300'><circle cx='100' cy='60' r='34' fill='black'/><path d='M60 110 C60 140 75 155 100 155 C125 155 140 140 140 110 L140 220 C140 250 60 250 60 220 Z' fill='black'/></svg>");
-            -webkit-mask-size:var(--mock-mask-scale);mask-size:var(--mock-mask-scale);
-            -webkit-mask-position:50% var(--mock-mask-y);mask-position:50% var(--mock-mask-y);
-            -webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;
-            background-size:cover;background-position:center;
-        }
         .model-img{
             position:absolute;inset:0;width:100%;height:100%;
-            object-fit:cover;object-position:top center;
+            object-fit:cover;object-position:center;
             opacity:0;transition:opacity 0.7s ease;
         }
         .model-img.active{opacity:1;}
@@ -830,9 +801,8 @@
             const srcs = imgs.slice();
             const slides = [];
             srcs.forEach(s=>{ const src = typeof s==='string'?s:(s.src||s); slides.push({type:'fabric', src}); });
-            // add a single model slide at the end (either real modelImage or a masked mockup using first fabric)
+            // add a single model slide at the end only if a real model image is provided
             if(modelImg){ slides.push({type:'model', src: modelImg}); }
-            else if(srcs.length){ slides.push({type:'mockup', src: (typeof srcs[0]==='string'?srcs[0]:(srcs[0].src||srcs[0]))}); }
 
             images = slides; // store slide descriptors
             total = images.length;
@@ -843,9 +813,8 @@
                 if(s.type==='fabric'){
                     div.innerHTML = `<div class="slide"><div class="slide-fabric-panel"><img class="fabric-img" src="${s.src}" alt="${title} — image ${i+1}" loading="lazy"></div></div>`;
                 } else if(s.type==='model'){
-                    div.innerHTML = `<div class="slide"><div class="slide-fabric-panel"><img class="fabric-img" src="${s.src}" alt="${title} — model" loading="lazy"></div></div>`;
-                } else { // mockup - show masked mockup using background-image
-                    div.innerHTML = `<div class="slide"><div class="slide-fabric-panel"><img class="fabric-img" src="${s.src}" alt="${title} — fabric" loading="lazy"></div><div class="slide-model-panel" style="background-image:url('${s.src}')"></div></div>`;
+                    // model slide: show the real model photo full-height on the right panel
+                    div.innerHTML = `<div class="slide"><div class="slide-fabric-panel"><img class="fabric-img" src="${s.src}" alt="${title} — fabric" loading="lazy"></div><div class="slide-model-panel"><img class="model-img" src="${s.src}" alt="${title} — model" loading="lazy"></div></div>`;
                 }
                 track.appendChild(div);
                 const dot=document.createElement('button');
@@ -957,7 +926,7 @@
                 const images    = item.images || [item.image];
                 const thumb     = item.thumbnail || (typeof images[0] === 'string' ? images[0] : (images[0] && (images[0].src || images[0].fabric)));
                 const modelBg   = item.modelImage || null;
-                const allCount  = images.length + 1; // fabric images + one model/mockup slide
+                const allCount  = images.length + (modelBg ? 1 : 0); // fabric images + optional model slide
 
                 const fig = document.createElement('figure');
                 fig.className = 'gallery-item';
@@ -966,9 +935,9 @@
                 fig.innerHTML = `
                     <div class="img-wrap">
                         <img class="img-fabric" src="${thumb}" alt="${item.title}" width="400" height="400" loading="lazy">
-                        <div class="img-model" aria-hidden="true" style="background-image:url('${modelBg ? modelBg : thumb}')"></div>
+                        ${modelBg ? `<img class="img-model" src="${modelBg}" alt="${item.title} — model view" width="400" height="400" loading="lazy">` : ''}
                         ${allCount > 1 ? `<span class="img-count-badge"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>${allCount} photos</span>` : ''}
-                        <span class="model-badge">Model view</span>
+                        ${modelBg ? `<span class="model-badge">Model view</span>` : ''}
                     </div>
                     <figcaption>
                         <h4>${item.title}</h4>
