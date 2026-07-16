@@ -334,6 +334,8 @@
             position:relative;overflow:hidden;background:#f0ece6;
             background-size:cover;background-position:center;
         }
+        .slide-model-panel.no-model{display:flex;align-items:center;justify-content:center;color:var(--color-text-muted);font-size:0.95rem}
+        .slide-model-panel.no-model::after{content:'Model image not available';opacity:0.9}
         .panel-label{
             position:absolute;top:1rem;left:1rem;
             background:color-mix(in srgb,black 55%,transparent);
@@ -815,7 +817,7 @@
                 } else if(s.type==='model'){
                     // model slide: left panel should still show a fabric close-up (use first fabric src), right panel shows the model photo
                     const fabricSrc = (srcs && srcs.length) ? (typeof srcs[0] === 'string' ? srcs[0] : (srcs[0].src||srcs[0])) : '';
-                    div.innerHTML = `<div class="slide"><div class="slide-fabric-panel">${fabricSrc?`<img class="fabric-img" src="${fabricSrc}" alt="${title} — fabric" loading="lazy">`:''}</div><div class="slide-model-panel">${s.src?`<img class="model-img" src="${s.src}" alt="${title} — model" loading="lazy">`:''}</div></div>`;
+                    div.innerHTML = `<div class="slide"><div class="slide-fabric-panel">${fabricSrc?`<img class="fabric-img" src="${fabricSrc}" alt="${title} — fabric" loading="lazy">`:''}</div><div class="slide-model-panel">${s.src?`<img class="model-img" src="${s.src}" alt="${title} — model" loading="lazy" onerror="this.dataset.loadError='1';this.style.display='none';this.closest('.slide-model-panel').classList.add('no-model');" onload="this.classList.add('active');">`:''}</div></div>`;
                 }
                 track.appendChild(div);
                 const dot=document.createElement('button');
