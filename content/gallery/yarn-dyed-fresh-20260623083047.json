@@ -2,6 +2,9 @@
     "category":  "Yarn Dyed",
     "title":  "Yarn Dyed Fresh",
     "note":  "54\"",
-    "image":  "/uploads/whatsapp-image-2026-06-22-at-12.12.28-pm.jpeg",
-    "modelImage":  "/uploads/model-yarn-5.png"
+    "image": "/uploads/whatsapp-image-2026-06-22-at-12.12.28-pm.jpeg",
+    "images": [
+        "/uploads/whatsapp-image-2026-06-22-at-12.12.28-pm.jpeg"
+    ],
+    "modelImage": "/uploads/model-yarn-8.png"
 }

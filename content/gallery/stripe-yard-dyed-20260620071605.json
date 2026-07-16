@@ -1,7 +1,10 @@
 ﻿{
     "category":  "Yarn Dyed",
-    "image":  "/uploads/7-yarn-dyed.jpeg",
-    "title":  "Stripe Yard-Dyed",
-    "note":  "54\"",
-    "modelImage":  "/uploads/model-yarn-2.png"
+    "image": "/uploads/7-yarn-dyed.jpeg",
+    "images": [
+        "/uploads/7-yarn-dyed.jpeg"
+    ],
+    "title": "Stripe Yard-Dyed",
+    "note": "54\"",
+    "modelImage": "/uploads/model-yarn-7.png"
 }
