@@ -813,8 +813,9 @@
                 if(s.type==='fabric'){
                     div.innerHTML = `<div class="slide"><div class="slide-fabric-panel"><img class="fabric-img" src="${s.src}" alt="${title} — image ${i+1}" loading="lazy"></div></div>`;
                 } else if(s.type==='model'){
-                    // model slide: show the real model photo full-height on the right panel
-                    div.innerHTML = `<div class="slide"><div class="slide-fabric-panel"><img class="fabric-img" src="${s.src}" alt="${title} — fabric" loading="lazy"></div><div class="slide-model-panel"><img class="model-img" src="${s.src}" alt="${title} — model" loading="lazy"></div></div>`;
+                    // model slide: left panel should still show a fabric close-up (use first fabric src), right panel shows the model photo
+                    const fabricSrc = (srcs && srcs.length) ? (typeof srcs[0] === 'string' ? srcs[0] : (srcs[0].src||srcs[0])) : '';
+                    div.innerHTML = `<div class="slide"><div class="slide-fabric-panel">${fabricSrc?`<img class="fabric-img" src="${fabricSrc}" alt="${title} — fabric" loading="lazy">`:''}</div><div class="slide-model-panel">${s.src?`<img class="model-img" src="${s.src}" alt="${title} — model" loading="lazy">`:''}</div></div>`;
                 }
                 track.appendChild(div);
                 const dot=document.createElement('button');
