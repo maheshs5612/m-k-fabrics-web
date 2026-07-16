@@ -1,11 +1,11 @@
-{
-  "category": "Yarn Dyed",
-  "image": "/uploads/2-yarn-dyed.jpeg",
-  "images": [
-    "/uploads/2-yarn-dyed.jpeg",
-    "/uploads/2-yarn-dyed.jpeg"
-  ],
-  "modelImage": "https://picsum.photos/seed/yarn-model-b/600/800",
-  "title": "Check Yarn-Dyed",
-  "note": "54\""
+﻿{
+    "category":  "Yarn Dyed",
+    "image":  "/uploads/2-yarn-dyed.jpeg",
+    "images":  [
+                   "/uploads/2-yarn-dyed.jpeg",
+                   "/uploads/2-yarn-dyed.jpeg"
+               ],
+    "title":  "Check Yarn-Dyed",
+    "note":  "54\"",
+    "modelImage":  "/uploads/model-yarn-10.png"
 }
