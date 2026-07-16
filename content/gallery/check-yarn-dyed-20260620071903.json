@@ -1,10 +1,10 @@
 ﻿{
     "category":  "Yarn Dyed",
     "image":  "/uploads/2-yarn-dyed.jpeg",
-    "images": [
-        "/uploads/5-yarn-dyed.jpeg"
-    ],
-    "title": "Check Yarn-Dyed",
-    "note": "54\"",
-    "modelImage": "/uploads/models/model-yarn-5.png"
+    "images":  [
+                   "/uploads/5-yarn-dyed.jpeg"
+               ],
+    "title":  "Check Yarn-Dyed",
+    "note":  "54\"",
+    "modelImage":  "/uploads/models/Modal-5-Yarn-Dyed.png"
 }
