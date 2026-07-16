@@ -832,6 +832,13 @@
             track.style.transform=`translateX(-${current*100}%)`;
             counter.textContent=`${current+1} / ${total}`;
             dots.querySelectorAll('.lb-dot').forEach((d,i)=>d.classList.toggle('active',i===current));
+            // toggle active class on images so CSS transitions make them visible
+            track.querySelectorAll('.lb-slide').forEach((slide,i)=>{
+                const f = slide.querySelector('.fabric-img');
+                const m = slide.querySelector('.model-img');
+                if(f) f.classList.toggle('active', i===current);
+                if(m) m.classList.toggle('active', i===current);
+            });
             btnPrev.style.display = total<=1?'none':'';
             btnNext.style.display = total<=1?'none':'';
         }
