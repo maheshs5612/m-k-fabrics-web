@@ -1,0 +1,23 @@
+name: Sync gallery and model images
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    types: [closed]
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.pull_request.merged == true)
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          persist-credentials: true
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+      - name: Run gallery sync script
+        run: |
+          node scripts/sync-gallery.js
