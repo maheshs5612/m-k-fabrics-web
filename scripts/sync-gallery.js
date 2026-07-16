@@ -54,6 +54,10 @@ function sync(){
     if(Array.isArray(obj.images) && obj.images.length>0) fabric = obj.images[0];
     else if(obj.image) fabric = obj.image;
     if(!fabric) return;
+    // only map model images for Yarn-Dyed category items to avoid cross-section collisions
+    const category = (obj.category || '').toString().toLowerCase();
+    if(!category.includes('yarn')) return; // skip non-yarn items
+
     const fabricBase = path.basename(fabric).toLowerCase();
     // try to find model file that contains fabric basename
     let matched = null;
