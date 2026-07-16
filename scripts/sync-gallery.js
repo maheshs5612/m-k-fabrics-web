@@ -80,10 +80,72 @@ function sync(){
     try{
       execSync('git config user.email "github-actions[bot]@users.noreply.github.com"');
       execSync('git config user.name "github-actions[bot]"');
+      // Stage files
       execSync('git add content/gallery/*.json content/gallery/index.json uploads/models/*', { stdio: 'inherit' });
-      execSync('git commit -m "Auto-sync: update content/gallery index and modelImage mappings"', { stdio: 'inherit' });
-      execSync('git push origin HEAD', { stdio: 'inherit' });
-      console.log('Committed and pushed', changed.length, 'files');
+
+      const githubToken = process.env.GITHUB_TOKEN;
+      const repoEnv = process.env.GITHUB_REPOSITORY; // owner/repo
+
+      if(githubToken && repoEnv){
+        // Create a branch and push, then open a PR
+        const branch = `auto-sync/gallery-${Date.now()}`;
+        execSync(`git checkout -b ${branch}`, { stdio: 'inherit' });
+        execSync('git commit -m "Auto-sync: update content/gallery index and modelImage mappings"', { stdio: 'inherit' });
+        execSync(`git push -u origin ${branch}`, { stdio: 'inherit' });
+
+        // Create PR via GitHub API
+        try{
+          const [owner, repo] = repoEnv.split('/');
+          const postData = JSON.stringify({
+            title: 'Auto-sync: update content/gallery index and modelImage mappings',
+            head: branch,
+            base: 'main',
+            body: 'This PR was created automatically by the gallery sync workflow to update index.json and modelImage mappings.'
+          });
+
+          const https = require('https');
+          const options = {
+            hostname: 'api.github.com',
+            path: `/repos/${owner}/${repo}/pulls`,
+            method: 'POST',
+            headers: {
+              'User-Agent': 'sync-gallery-script',
+              'Authorization': `token ${githubToken}`,
+              'Accept': 'application/vnd.github.v3+json',
+              'Content-Type': 'application/json',
+              'Content-Length': Buffer.byteLength(postData)
+            }
+          };
+
+          const req = https.request(options, (res) => {
+            let data = '';
+            res.on('data', (chunk) => data += chunk);
+            res.on('end', () => {
+              try{
+                const parsed = JSON.parse(data);
+                if(parsed && parsed.html_url){
+                  console.log('Created PR:', parsed.html_url);
+                } else {
+                  console.error('PR creation response:', data);
+                }
+              }catch(err){
+                console.error('Failed to parse PR response', err, data);
+              }
+            });
+          });
+          req.on('error', (e) => { console.error('PR request error', e); });
+          req.write(postData);
+          req.end();
+        }catch(apiErr){
+          console.error('Failed to create PR:', apiErr.message);
+        }
+      } else {
+        // Local fallback: commit to current branch and push
+        execSync('git commit -m "Auto-sync: update content/gallery index and modelImage mappings"', { stdio: 'inherit' });
+        execSync('git push origin HEAD', { stdio: 'inherit' });
+        console.log('Committed and pushed', changed.length, 'files');
+      }
+
     }catch(e){
       console.error('Git commit/push failed:', e.message);
       process.exit(1);
