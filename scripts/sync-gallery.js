@@ -50,33 +50,70 @@ function sync(){
     const full = path.join(galleryDir, jf);
     const obj = loadJson(full);
     if(!obj) return;
+    
+    // only map model images for Yarn-Dyed category items to avoid cross-section collisions
+    const category = (obj.category || '').toString().toLowerCase();
+    if(!category.includes('yarn')) {
+      // Remove any existing modelImage from non-Yarn items
+      if(obj.modelImage) { 
+        delete obj.modelImage; 
+        saveJson(full, obj); 
+        changed.push(full); 
+        console.log('Removed model from non-Yarn:', jf);
+      }
+      return;
+    }
+
+    // Get primary fabric image (first one in array, or single image)
     let fabric = null;
     if(Array.isArray(obj.images) && obj.images.length>0) fabric = obj.images[0];
     else if(obj.image) fabric = obj.image;
     if(!fabric) return;
-    // only map model images for Yarn-Dyed category items to avoid cross-section collisions
-    const category = (obj.category || '').toString().toLowerCase();
-    if(!category.includes('yarn')) return; // skip non-yarn items
 
-    const fabricBase = path.basename(fabric).toLowerCase();
-    // try to find model file that contains fabric basename
+    const fabricBase = basenameNoExt(fabric).toLowerCase();
+    const fabricExt = path.extname(fabric);
+    
+    // Try exact match: look for Modal-{fabricBase}.{any ext} (case-insensitive)
     let matched = null;
-    for(let i=0;i<modelFiles.length;i++){
-      const m = modelFiles[i];
-      if(m.toLowerCase().includes(fabricBase)) { matched = m; break; }
+    for(const m of modelFiles){
+      const mBase = basenameNoExt(m).toLowerCase();
+      // Exact match: "Modal-" + fabric base name
+      if(mBase === ('modal-' + fabricBase) || mBase === fabricBase) {
+        matched = m;
+        break;
+      }
     }
-    // fallback: extract leading number token and try match
+    
+    // If no exact match, try numeric prefix matching only (for numbered items like "1-yarn-dyed")
     if(!matched){
       const numMatch = fabricBase.match(/^([0-9]+)/);
       if(numMatch){
         const num = numMatch[1];
-        for(const m of modelFiles){ if(m.toLowerCase().includes(num)) { matched = m; break } }
+        // Look for model file that starts with Modal-{number}
+        for(const m of modelFiles){
+          const mBase = basenameNoExt(m).toLowerCase();
+          if(mBase.match(new RegExp(`^modal-${num}($|-)`))) {
+            matched = m;
+            break;
+          }
+        }
       }
     }
 
     if(matched){
       const newPath = '/uploads/models/' + matched;
-      if(obj.modelImage !== newPath){ obj.modelImage = newPath; saveJson(full,obj); changed.push(full); console.log('Updated', jf, '->', newPath); }
+      if(obj.modelImage !== newPath){ 
+        obj.modelImage = newPath; 
+        saveJson(full, obj); 
+        changed.push(full); 
+        console.log('Updated', jf, '(' + fabricBase + ') ->', matched);
+      }
+    } else if(obj.modelImage){
+      // Remove modelImage if no matching model file found
+      delete obj.modelImage;
+      saveJson(full, obj);
+      changed.push(full);
+      console.log('Removed unmatched model from', jf, '(' + fabricBase + ')');
     }
   });
 
