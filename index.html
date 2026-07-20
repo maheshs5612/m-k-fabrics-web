@@ -798,35 +798,52 @@
         let images=[], current=0, total=0;
 
         function buildSlides(imgs, modelImgs, title){
-            track.innerHTML='';
-            dots.innerHTML='';
-            const srcs = imgs.slice();
+            track.innerHTML = '';
+            dots.innerHTML = '';
+        
+            const fabricArr = (imgs || [])
+                .map(s => typeof s === 'string' ? s : (s?.src || s?.fabric || s))
+                .filter(Boolean);
+        
+            const modelArr = Array.isArray(modelImgs)
+                ? modelImgs.filter(Boolean)
+                : (modelImgs ? [modelImgs] : []);
+        
+            const slideCount = Math.max(fabricArr.length, modelArr.length, 1);
             const slides = [];
-            srcs.forEach(s=>{ const src = typeof s==='string'?s:(s.src||s); slides.push({type:'fabric', src}); });
-            // add a single model slide at the end only if a real model image is provided
-            const modelArr = Array.isArray(modelImgs) ? modelImgs : (modelImgs ? [modelImgs] : []); 
-            modelArr.forEach(mSrc=>{ if(mSrc) slides.push({type:'model', src: mSrc}); });
-
-            images = slides; // store slide descriptors
+        
+            for(let i = 0; i < slideCount; i++){
+                slides.push({
+                    fabric: fabricArr[i] || fabricArr[0] || null,
+                    model: modelArr[i] || modelArr[0] || null
+                });
+            }
+        
+            images = slides;
             total = images.length;
-
+        
             images.forEach((s,i)=>{
                 const div = document.createElement('div');
-                div.className='lb-slide';
-                if(s.type==='fabric'){
-                    div.innerHTML = `<div class="slide"><div class="slide-fabric-panel"><img class="fabric-img" src="${s.src}" alt="${title} — image ${i+1}" loading="lazy"></div></div>`;
-                } else if(s.type==='model'){
-                    // model slide: left panel should still show a fabric close-up (use first fabric src), right panel shows the model photo
-                    const fabricSrc = (srcs && srcs.length) ? (typeof srcs[0] === 'string' ? srcs[0] : (srcs[0].src||srcs[0])) : '';
-                    div.innerHTML = `<div class="slide"><div class="slide-fabric-panel">${fabricSrc?`<img class="fabric-img" src="${fabricSrc}" alt="${title} — fabric" loading="lazy">`:''}</div><div class="slide-model-panel">${s.src?`<img class="model-img" src="${s.src}" alt="${title} — model" loading="lazy" onerror="this.dataset.loadError='1';this.style.display='none';this.closest('.slide-model-panel').classList.add('no-model');" onload="this.classList.add('active');">`:''}</div></div>`;
-                }
+                div.className = 'lb-slide';
+                div.innerHTML = `
+                    <div class="slide">
+                        <div class="slide-fabric-panel">
+                            ${s.fabric ? `<img class="fabric-img active" src="${s.fabric}" alt="${title} fabric ${i+1}" loading="eager">` : ''}
+                        </div>
+                        <div class="slide-model-panel">
+                            ${s.model ? `<img class="model-img active" src="${s.model}" alt="${title} model ${i+1}" loading="eager">` : ''}
+                        </div>
+                    </div>
+                `;
                 track.appendChild(div);
-                const dot=document.createElement('button');
-                dot.className='lb-dot';
-                dot.setAttribute('aria-label',`View image ${i+1}`);
-                dot.addEventListener('click',()=>goTo(i));
+        
+                const dot = document.createElement('button');
+                dot.className = 'lb-dot';
+                dot.setAttribute('aria-label', `View image ${i+1}`);
+                dot.addEventListener('click', () => goTo(i));
                 dots.appendChild(dot);
             });
+        
             titleEl.textContent = title;
         }
 
