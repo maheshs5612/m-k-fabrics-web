@@ -506,7 +506,7 @@
         .lb-slide .slide{display:grid;grid-template-columns:1fr 1fr;width:100%;height:100%;align-items:stretch}
         .lb-slide .slide-fabric-panel,.lb-slide .slide-model-panel{position:relative;height:100%;overflow:hidden}
         .lb-slide img{max-width:100%;max-height:72vh;object-fit:contain;display:block}
-        .lb-slide .fabric-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center top}
+        .lb-slide .fabric-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center top;opacity:1;transition:none}
         .lb-arr{position:absolute;top:50%;transform:translateY(-50%);width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,0.15);backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,0.2);display:grid;place-items:center;color:#fff;cursor:pointer;z-index:2;transition:background 0.18s ease;}
         .lb-arr{
             position:absolute;top:50%;transform:translateY(-50%);
@@ -705,7 +705,7 @@
                 <div class="section-head reveal">
                     <div>
                         <span class="eyebrow">Location</span>
-                        <h2 style="margin-top:0.75rem;">Visit our showroom</h2>
+                        <h2 style="margin-top:0.75rem;">Visit our Office</h2>
                     </div>
                 </div>
                 <div class="contact-grid reveal">
@@ -797,35 +797,53 @@
         const btnNext = document.getElementById('lb-next');
         let images=[], current=0, total=0;
 
-        function buildSlides(imgs, modelImg, title){
-            track.innerHTML='';
-            dots.innerHTML='';
-            const srcs = imgs.slice();
+        function buildSlides(imgs, modelImgs, title){
+            track.innerHTML = '';
+            dots.innerHTML = '';
+        
+            const fabricArr = (imgs || [])
+                .map(s => typeof s === 'string' ? s : (s?.src || s?.fabric || s))
+                .filter(Boolean);
+        
+            const modelArr = Array.isArray(modelImgs)
+                ? modelImgs.filter(Boolean)
+                : (modelImgs ? [modelImgs] : []);
+        
+            const slideCount = Math.max(fabricArr.length, modelArr.length, 1);
             const slides = [];
-            srcs.forEach(s=>{ const src = typeof s==='string'?s:(s.src||s); slides.push({type:'fabric', src}); });
-            // add a single model slide at the end only if a real model image is provided
-            if(modelImg){ slides.push({type:'model', src: modelImg}); }
-
-            images = slides; // store slide descriptors
+        
+            for(let i = 0; i < slideCount; i++){
+                slides.push({
+                    fabric: fabricArr[i] || fabricArr[0] || null,
+                    model: modelArr[i] || modelArr[0] || null
+                });
+            }
+        
+            images = slides;
             total = images.length;
-
+        
             images.forEach((s,i)=>{
                 const div = document.createElement('div');
-                div.className='lb-slide';
-                if(s.type==='fabric'){
-                    div.innerHTML = `<div class="slide"><div class="slide-fabric-panel"><img class="fabric-img" src="${s.src}" alt="${title} — image ${i+1}" loading="lazy"></div></div>`;
-                } else if(s.type==='model'){
-                    // model slide: left panel should still show a fabric close-up (use first fabric src), right panel shows the model photo
-                    const fabricSrc = (srcs && srcs.length) ? (typeof srcs[0] === 'string' ? srcs[0] : (srcs[0].src||srcs[0])) : '';
-                    div.innerHTML = `<div class="slide"><div class="slide-fabric-panel">${fabricSrc?`<img class="fabric-img" src="${fabricSrc}" alt="${title} — fabric" loading="lazy">`:''}</div><div class="slide-model-panel">${s.src?`<img class="model-img" src="${s.src}" alt="${title} — model" loading="lazy" onerror="this.dataset.loadError='1';this.style.display='none';this.closest('.slide-model-panel').classList.add('no-model');" onload="this.classList.add('active');">`:''}</div></div>`;
-                }
+                div.className = 'lb-slide';
+                div.innerHTML = `
+                    <div class="slide">
+                        <div class="slide-fabric-panel">
+                            ${s.fabric ? `<img class="fabric-img active" src="${s.fabric}" alt="${title} fabric ${i+1}" loading="eager">` : ''}
+                        </div>
+                        <div class="slide-model-panel">
+                            ${s.model ? `<img class="model-img active" src="${s.model}" alt="${title} model ${i+1}" loading="eager">` : ''}
+                        </div>
+                    </div>
+                `;
                 track.appendChild(div);
-                const dot=document.createElement('button');
-                dot.className='lb-dot';
-                dot.setAttribute('aria-label',`View image ${i+1}`);
-                dot.addEventListener('click',()=>goTo(i));
+        
+                const dot = document.createElement('button');
+                dot.className = 'lb-dot';
+                dot.setAttribute('aria-label', `View image ${i+1}`);
+                dot.addEventListener('click', () => goTo(i));
                 dots.appendChild(dot);
             });
+        
             titleEl.textContent = title;
         }
 
@@ -845,8 +863,8 @@
             btnNext.style.display = total<=1?'none':'';
         }
 
-        function open(imgs, modelImg, title){
-            buildSlides(imgs, modelImg, title);
+        function open(imgs, modelImgs, title){
+            buildSlides(imgs, modelImgs, title);
             overlay.classList.add('open');
             document.body.style.overflow='hidden';
             goTo(0);
@@ -885,113 +903,105 @@
     (async function(){
         const root   = document.getElementById('gallery-root');
         const status = document.getElementById('gallery-status');
-
-        // Fetch all gallery items from the API, fallback to static content files when not available
-        let items = [];
-        try {
-            const res = await fetch('/api/gallery');
-            if (!res.ok) throw new Error('API error');
-            items = await res.json();
-        } catch(e) {
-            // Fallback to static content index (used in local/static previews and when CMS API isn't available)
+    
+        async function loadJsonSafe(url){
             try {
-                const idxRes = await fetch('/content/gallery/index.json');
-                if (!idxRes.ok) throw new Error('index.json missing');
-                const files = await idxRes.json();
-                const loads = files.map(f => fetch('/content/gallery/' + f).then(r => r.ok ? r.json() : null));
-                const loaded = await Promise.all(loads);
-                items = loaded.filter(Boolean);
-            } catch(err) {
+                const res = await fetch(url, {cache:'no-store'});
+                if (!res.ok) return null;
+                return await res.json();
+            } catch {
+                return null;
+            }
+        }
+    
+        let items = [];
+        const apiItems = await loadJsonSafe('/api/gallery');
+        if (Array.isArray(apiItems) && apiItems.length) {
+            items = apiItems;
+        } else {
+            const files = await loadJsonSafe('/content/gallery/index.json');
+            if (!Array.isArray(files) || !files.length) {
                 status.textContent = 'Could not load gallery.';
                 return;
             }
+    
+            const loaded = await Promise.all(files.map(async (f) => {
+                const item = await loadJsonSafe('/content/gallery/' + f);
+                return item && typeof item === 'object' ? item : null;
+            }));
+    
+            items = loaded.filter(Boolean);
         }
-
-        if (!items || !items.length) { status.textContent = 'No items yet.'; return; }
+    
+        if (!items.length) {
+            status.textContent = 'No items yet.';
+            return;
+        }
+    
         status.style.display = 'none';
-
-        // Group by category
+        root.innerHTML = '';
+    
         const cats = {};
-        items.forEach(item=>{
+        items.forEach((item)=>{
+            if (!item || typeof item !== 'object') return;
             const cat = item.category || 'Other';
-            if(!cats[cat]) cats[cat]=[];
-            cats[cat].push(item);
+            (cats[cat] ||= []).push(item);
         });
-
+    
         const INITIAL_SHOW = 8;
-
+    
         Object.entries(cats).forEach(([cat, list])=>{
             const sec = document.createElement('div');
             sec.className = 'gallery-section reveal';
-
+    
             const hdr = document.createElement('div');
             hdr.className = 'gallery-category-header';
             hdr.innerHTML = `<h3>${cat}</h3>`;
             sec.appendChild(hdr);
-
+    
             const grid = document.createElement('div');
             grid.className = 'gallery-grid';
-
+    
             list.forEach((item, idx)=>{
-                const images    = item.images || [item.image];
-                const thumb     = item.thumbnail || (typeof images[0] === 'string' ? images[0] : (images[0] && (images[0].src || images[0].fabric)));
-                const modelBg   = item.modelImage || (Array.isArray(item.modelImages) && item.modelImages.length ? item.modelImages[0] : null);
-                const allCount  = images.length + (modelBg ? 1 : 0); // fabric images + optional model slide
+                const images = Array.isArray(item.images) && item.images.length ? item.images : (item.image ? [item.image] : []);
+                const modelImgs = Array.isArray(item.modelImages) ? item.modelImages.filter(Boolean) : (item.modelImage ? [item.modelImage] : []);
+                const thumb = item.thumbnail || (typeof images[0] === 'string' ? images[0] : (images[0] && (images[0].src || images[0].fabric))) || modelImgs[0] || '';
+                if (!thumb) return;
+
+                const modelBg = modelImgs[0] || null;
+                const allCount = images.length + modelImgs.length;
 
                 const fig = document.createElement('figure');
                 fig.className = 'gallery-item';
                 if(idx >= INITIAL_SHOW) fig.style.display='none';
-
+    
                 fig.innerHTML = `
                     <div class="img-wrap">
-                        <img class="img-fabric" src="${thumb}" alt="${item.title}" width="400" height="400" loading="lazy">
-                        ${modelBg ? `<img class="img-model" src="${modelBg}" alt="${item.title} — model view" width="400" height="400" loading="lazy">` : ''}
-                        ${allCount > 1 ? `<span class="img-count-badge"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>${allCount} photos</span>` : ''}
+                        <img class="img-fabric" src="${thumb}" alt="${item.title || 'Gallery item'}" width="400" height="400" loading="lazy" decoding="async">
+                        ${modelBg ? `<img class="img-model" src="${modelBg}" alt="${(item.title || 'Gallery item')} — model view" width="400" height="400" loading="lazy" decoding="async">` : ''}
+                        ${allCount > 1 ? `<span class="img-count-badge">${allCount} photos</span>` : ''}
                         ${modelBg ? `<span class="model-badge">Model view</span>` : ''}
                     </div>
                     <figcaption>
-                        <h4>${item.title}</h4>
-                        <p>${item.category}${item.note ? ' · ' + item.note : ''}</p>
+                        <h4>${item.title || 'Untitled'}</h4>
+                        <p>${item.category || 'Other'}${item.note ? ' · ' + item.note : ''}</p>
                     </figcaption>
                 `;
-
+    
                 fig.addEventListener('click', ()=>{
-                    LB.open(images, modelBg, item.title);
+                    if (window.LB && typeof LB.open === 'function') LB.open(images, modelImgs, item.title || 'Gallery item');
                 });
-
+    
                 grid.appendChild(fig);
             });
-
-            sec.appendChild(grid);
-
-            if(list.length > INITIAL_SHOW){
-                const wrap = document.createElement('div');
-                wrap.className = 'show-more-wrap';
-                const btn = document.createElement('button');
-                btn.className = 'btn-show-more';
-                let expanded = false;
-                const hidden = list.length - INITIAL_SHOW;
-                btn.textContent = `Show ${hidden} more`;
-                btn.addEventListener('click', ()=>{
-                    expanded = !expanded;
-                    grid.querySelectorAll('.gallery-item').forEach((el,i)=>{
-                        if(i>=INITIAL_SHOW) el.style.display = expanded?'':'none';
-                    });
-                    btn.textContent = expanded ? 'Show less' : `Show ${hidden} more`;
-                });
-                wrap.appendChild(btn);
-                sec.appendChild(wrap);
+    
+            if (grid.children.length) {
+                sec.appendChild(grid);
+                root.appendChild(sec);
             }
-
-            root.appendChild(sec);
         });
-
-        // Re-run reveal observer for dynamically added elements
-        const obs = new IntersectionObserver(entries=>entries.forEach(e=>{
-            if(e.isIntersecting){e.target.classList.add('is-visible');obs.unobserve(e.target);}
-        }),{threshold:0.1});
-        root.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
     })();
+    
     </script>
 </body>
 </html>

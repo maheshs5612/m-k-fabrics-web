@@ -1,9 +1,10 @@
 ﻿{
     "category":  "Yarn Dyed",
     "title":  "Yarn Dyed Fresh",
+    "image": "/uploads/Mix-Yarn-Dyed.jpeg",
     "note":  "54\"",
-    "image": "/uploads/whatsapp-image-2026-06-22-at-12.12.28-pm.jpeg",
-    "images": [
-        "/uploads/whatsapp-image-2026-06-22-at-12.12.28-pm.jpeg"
+    "modelImage": "/uploads/models/Modal-Mix-Yarn-Dyed.png",
+    "modelImages": [
+        "/uploads/models/Modal-Mix-Yarn-Dyed.png"
     ]
 }
