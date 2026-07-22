@@ -3,8 +3,9 @@
   "title": "Plain Cambric",
   "note": "44\"",
   "image": "/uploads/12-cambric.jpeg",
-  "images": ["/uploads/12-cambric.jpeg"],
-  "modelImage": "/uploads/models/Cambric/Model-12-Cambric.png",
+  "images": [
+    "/uploads/12-cambric.jpeg"
+  ],
   "modelImages": [
     "/uploads/models/Cambric/Model-12-Cambric.png"
   ]
