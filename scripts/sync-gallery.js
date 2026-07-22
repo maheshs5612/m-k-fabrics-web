@@ -36,12 +36,28 @@ function sync(){
   writeIndexJson(jsonFiles);
   console.log('Wrote index.json with', jsonFiles.length, 'entries');
 
-  if(!fs.existsSync(modelsDir)){
-    console.log('uploads/models does not exist; skipping model mapping');
-    return;
+  // scan uploads directory recursively for any Modal-* files so model photos can live in fabric-specific folders
+  function findModalFiles(dir){
+    const results = [];
+    function walk(d){
+      fs.readdirSync(d).forEach(f=>{
+        const fp = path.join(d,f);
+        const stat = fs.statSync(fp);
+        if(stat.isDirectory()) return walk(fp);
+        if(/Modal-|Model-/i.test(f)) results.push(fp);
+      });
+    }
+    walk(dir);
+    return results;
   }
 
-  const modelFiles = fs.readdirSync(modelsDir).filter(f=>!/^.git/.test(f));
+  const modalFilesFull = fs.existsSync(uploadsDir) ? findModalFiles(uploadsDir) : [];
+  if(!modalFilesFull.length){
+    console.log('No Modal files found under uploads; skipping model mapping');
+    return;
+  }
+  // convert to repo-relative posix paths (e.g., uploads/models/Modal-3.png)
+  const modelFiles = modalFilesFull.map(fp => path.relative(repoRoot, fp).replace(/\\/g,'/'));
   const modelLower = modelFiles.map(f=>f.toLowerCase());
 
   const changed = [];
@@ -77,8 +93,8 @@ function sync(){
     let matched = null;
     for(const m of modelFiles){
       const mBase = basenameNoExt(m).toLowerCase();
-      // Exact match: "Modal-" + fabric base name
-      if(mBase === ('modal-' + fabricBase) || mBase === fabricBase) {
+      // Exact match: allow both 'modal-' and 'model-' prefixes, or exact basename
+      if(mBase === ('modal-' + fabricBase) || mBase === ('model-' + fabricBase) || mBase === fabricBase) {
         matched = m;
         break;
       }
@@ -101,12 +117,13 @@ function sync(){
     }
 
     if(matched){
-      const newPath = '/uploads/models/' + matched;
+      // matched is repo-relative path like 'uploads/models/Modal-3.png' — prefix with leading slash for public URL
+      const newPath = '/' + matched.replace(/\\/g,'/');
       if(obj.modelImage !== newPath){ 
         obj.modelImage = newPath; 
         saveJson(full, obj); 
         changed.push(full); 
-        console.log('Updated', jf, '(' + fabricBase + ') ->', matched);
+        console.log('Updated', jf, '(' + fabricBase + ') ->', newPath);
       }
     } else if(obj.modelImage){
       // Remove modelImage if no matching model file found
@@ -122,7 +139,7 @@ function sync(){
       execSync('git config user.email "github-actions[bot]@users.noreply.github.com"');
       execSync('git config user.name "github-actions[bot]"');
       // Stage files
-      execSync('git add content/gallery/*.json content/gallery/index.json uploads/models/*', { stdio: 'inherit' });
+      execSync('git add content/gallery/*.json content/gallery/index.json', { stdio: 'inherit' });
 
       const githubToken = process.env.GITHUB_TOKEN;
       const repoEnv = process.env.GITHUB_REPOSITORY; // owner/repo

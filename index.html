@@ -967,10 +967,10 @@
                 const modelImgs = Array.isArray(item.modelImages) ? item.modelImages.filter(Boolean) : (item.modelImage ? [item.modelImage] : []);
                 const thumb = item.thumbnail || (typeof images[0] === 'string' ? images[0] : (images[0] && (images[0].src || images[0].fabric))) || modelImgs[0] || '';
                 if (!thumb) return;
-    
+
                 const modelBg = modelImgs[0] || null;
                 const allCount = images.length + modelImgs.length;
-    
+
                 const fig = document.createElement('figure');
                 fig.className = 'gallery-item';
                 if(idx >= INITIAL_SHOW) fig.style.display='none';
