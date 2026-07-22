@@ -7,7 +7,7 @@
     "title":  "Check Yarn-Dyed",
     "note":  "54\"",
     "modelImage": "/uploads/models/Yarn-Dyed/Modal-5-Yarn-Dyed.png"
-    "modelImage": [
+    "modelImages": [
         "/uploads/models/Yarn-Dyed/Modal-5-Yarn-Dyed.png"
     ]
 }
