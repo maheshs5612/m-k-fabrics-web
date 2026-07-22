@@ -6,7 +6,11 @@
     ],
     "title": "Stripe Yarn-Dyed",
     "note": "54\"",
-    "modelImage": "/uploads/models/Modal-3-Yarn-Dyed.png"
+    "modelImage": "/uploads/models/Yarn-Dyed/Modal-3-Yarn-Dyed.png",
+    "modelImages": [
+        "/uploads/models/Yarn-Dyed/Modal-3-Yarn-Dyed.png"
+    ]
+
 }
 
 
