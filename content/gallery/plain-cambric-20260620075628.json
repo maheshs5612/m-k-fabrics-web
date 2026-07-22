@@ -1,6 +1,10 @@
 {
   "category": "Cambric",
   "title": "Plain Cambric",
+  "image": "/uploads/12-cambric.jpeg",
   "note": "44\"",
-  "image": "/uploads/12-cambric.jpeg"
+  "modelImage": "/uploads/models/Cambric/Model-12-Cambric.png",
+  "modelImages": [
+        "/uploads/models/Cambric/Model-12-Cambric.png"
+    ]
 }
