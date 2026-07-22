@@ -2,13 +2,14 @@
     "category":  "Yarn Dyed",
     "image":  "/uploads/2-yarn-dyed.jpeg",
     "images":  [
-                   "/uploads/6-yarn-dyed.jpeg"
-               ],
+        "/uploads/2-yarn-dyed.jpeg",
+        "/uploads/6-yarn-dyed.jpeg"
+    ],
     "title":  "Check Yarn-Dyed",
     "note":  "54\"",
     "modelImage": "/uploads/models/Yarn-Dyed/Modal-6-Yarn-Dyed.png",
     "modelImages": [
-        "modelImage": "/uploads/models/Yarn-Dyed/Modal-6-Yarn-Dyed.png"
+        "/uploads/models/Yarn-Dyed/Modal-6-Yarn-Dyed.png"
     ]
 }
 
