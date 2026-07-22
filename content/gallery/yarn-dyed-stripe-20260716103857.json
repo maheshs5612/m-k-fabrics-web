@@ -2,5 +2,8 @@
   "category": "Yarn Dyed",
   "title": "Yarn-Dyed Stripe",
   "image": "/uploads/8-yarn-dyed.jpeg",
+  "modelImages": [
+    "/uploads/models/Yarn-Dyed/Modal-8-Yarn-Dyed.png"
+  ],
   "modelImage": "/uploads/models/Yarn-Dyed/Modal-8-Yarn-Dyed.png"
 }
