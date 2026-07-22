@@ -44,7 +44,7 @@ function sync(){
         const fp = path.join(d,f);
         const stat = fs.statSync(fp);
         if(stat.isDirectory()) return walk(fp);
-        if(/Modal-/i.test(f)) results.push(fp);
+        if(/Modal-|Model-/i.test(f)) results.push(fp);
       });
     }
     walk(dir);
@@ -93,8 +93,8 @@ function sync(){
     let matched = null;
     for(const m of modelFiles){
       const mBase = basenameNoExt(m).toLowerCase();
-      // Exact match: "Modal-" + fabric base name
-      if(mBase === ('modal-' + fabricBase) || mBase === fabricBase) {
+      // Exact match: allow both 'modal-' and 'model-' prefixes, or exact basename
+      if(mBase === ('modal-' + fabricBase) || mBase === ('model-' + fabricBase) || mBase === fabricBase) {
         matched = m;
         break;
       }

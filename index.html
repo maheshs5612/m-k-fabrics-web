@@ -935,7 +935,7 @@
             list.forEach((item, idx)=>{
                 const images    = item.images || [item.image];
                 const thumb     = item.thumbnail || (typeof images[0] === 'string' ? images[0] : (images[0] && (images[0].src || images[0].fabric)));
-                const modelBg   = item.modelImage || null;
+                const modelBg   = item.modelImage || (Array.isArray(item.modelImages) && item.modelImages.length ? item.modelImages[0] : null);
                 const allCount  = images.length + (modelBg ? 1 : 0); // fabric images + optional model slide
 
                 const fig = document.createElement('figure');
