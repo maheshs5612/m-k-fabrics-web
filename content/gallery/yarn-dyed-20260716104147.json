@@ -1,6 +1,14 @@
 {
   "category": "Yarn Dyed",
   "image": "/uploads/seer-sucker-1.jpeg",
+  "images":  [
+          "/uploads/seer-sucker-1.jpeg"
+    ],
   "title": "Yarn-Dyed",
   "note": "54\""
+  "modelImage": "/uploads/models/Yarn-Dyed/Modal-seer-sucker-1.png",
+     "modelImages": [
+        "/uploads/models/Yarn-Dyed/Modal-seer-sucker-1.png"
+    ]
+
 }
