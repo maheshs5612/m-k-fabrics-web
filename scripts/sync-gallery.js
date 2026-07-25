@@ -7,6 +7,41 @@ const galleryDir = path.join(repoRoot, 'content', 'gallery');
 const uploadsDir = path.join(repoRoot, 'uploads');
 const modelsDir = path.join(uploadsDir, 'models');
 
+const MODEL_CONFIG = {
+  'yarn dyed': {
+    folder: 'Yarn-Dyed',
+    prefix: 'Modal'
+  },
+  'cambric': {
+    folder: 'Cambric',
+    prefix: 'Model'
+  },
+  'poplin': {
+    folder: 'Poplin',
+    prefix: 'Model'
+  },
+  'cotton voile': {
+    folder: 'Cotton-Voile',
+    prefix: 'Model'
+  },
+  'rayon': {
+    folder: 'Rayon',
+    prefix: 'Model'
+  }
+  'cotton': {
+    folder: 'Cotton',
+    prefix: 'Model'
+  }
+};
+
+function normalizeCategory(category) {
+  return category
+    .trim()
+    .toLowerCase()
+    .replace(/[-_]+/g, ' ')
+    .replace(/\s+/g, ' ');
+}
+
 function listJsonFiles(dir){
   return fs.readdirSync(dir).filter(f=>f.endsWith('.json')).sort();
 }
@@ -65,7 +100,7 @@ function sync(){
   }
 
   const modelFiles = getModelFiles(modelsDir);
-  console.log(modelFiles);
+  // console.log(modelFiles);
 
   const changed = [];
 
@@ -75,35 +110,33 @@ function sync(){
     if(!obj) return;
     
     // only map model images for Yarn-Dyed, Cambric category items to avoid cross-section collisions
-    const category = (obj.category || '').toString().toLowerCase();
-
-    const supportsModels =
-      category.includes('yarn') ||
-      category.includes('cambric');
+    const category = normalizeCategory(obj.category || '');
+    const config = MODEL_CONFIG[category];
     
-    if (!supportsModels) {
-      // Remove any existing modelImage from non-Yarn, non-Cambric items
-      if(obj.modelImage) { 
-        delete obj.modelImage; 
-        saveJson(full, obj); 
-        changed.push(full); 
-        console.log('Removed model from non-Yarn:', jf);
+    if (!config) {
+      console.log(`Skipping unsupported category "${category}" in ${jf}`);
+    
+      if (obj.modelImage) {
+        delete obj.modelImage;
+        saveJson(full, obj);
+        changed.push(full);
       }
+    
       return;
     }
 
-    const modelFolder = category.includes('cambric')
-      ? 'Cambric'
-      : 'Yarn-Dyed';
+    const modelFolder = config.folder;
+    const expectedPrefix = config.prefix.toLowerCase() + '-';
     
-    const expectedPrefix = category.includes('cambric')
-      ? 'model-'
-      : 'modal-';
-    
-    const candidateModels = modelFiles.filter(m =>
-      m.startsWith(modelFolder + '/') ||
-      m.startsWith(modelFolder + path.sep)
+    const candidateModels = modelFiles.filter(file =>
+      file.startsWith(modelFolder + '/') ||
+      file.startsWith(modelFolder + path.sep)
     );
+    
+    if (candidateModels.length === 0) {
+      console.log(   `No model images found under uploads/models/${modelFolder}` );
+      return;
+    }
 
     // Get primary fabric image (first one in array, or single image)
     let fabric = null;
