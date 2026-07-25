@@ -26,7 +26,30 @@ function saveJson(p,obj){
   fs.writeFileSync(p, content, 'utf8');
 }
 
-function basenameNoExt(p){ return path.basename(p).replace(/\.[^.]+$/, ''); }
+function basenameNoExt(p){ 
+  return path.basename(p).replace(/\.[^.]+$/, ''); 
+}
+
+function getModelFiles(dir, relative = '') {
+  const files = [];
+
+  for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+    if (entry.name.startsWith('.')) continue;
+
+    if (entry.isDirectory()) {
+      files.push(
+        ...getModelFiles(
+          path.join(dir, entry.name),
+          path.join(relative, entry.name)
+        )
+      );
+    } else {
+      files.push(path.join(relative, entry.name));
+    }
+  }
+
+  return files;
+}
 
 function sync(){
   if(!fs.existsSync(galleryDir)){
@@ -41,8 +64,7 @@ function sync(){
     return;
   }
 
-  const modelFiles = fs.readdirSync(modelsDir).filter(f=>!/^.git/.test(f));
-  const modelLower = modelFiles.map(f=>f.toLowerCase());
+  const modelFiles = getModelFiles(modelsDir);
 
   const changed = [];
 
@@ -51,10 +73,15 @@ function sync(){
     const obj = loadJson(full);
     if(!obj) return;
     
-    // only map model images for Yarn-Dyed category items to avoid cross-section collisions
+    // only map model images for Yarn-Dyed, Cambric category items to avoid cross-section collisions
     const category = (obj.category || '').toString().toLowerCase();
-    if(!category.includes('yarn')) {
-      // Remove any existing modelImage from non-Yarn items
+
+    const supportsModels =
+      category.includes('yarn') ||
+      category.includes('cambric');
+    
+    if (!supportsModels) {
+      // Remove any existing modelImage from non-Yarn, non-Cambric items
       if(obj.modelImage) { 
         delete obj.modelImage; 
         saveJson(full, obj); 
@@ -64,6 +91,19 @@ function sync(){
       return;
     }
 
+    const modelFolder = category.includes('cambric')
+      ? 'Cambric'
+      : 'Yarn-Dyed';
+    
+    const expectedPrefix = category.includes('cambric')
+      ? 'model-'
+      : 'modal-';
+    
+    const candidateModels = modelFiles.filter(m =>
+      m.startsWith(modelFolder + '/') ||
+      m.startsWith(modelFolder + path.sep)
+    );
+
     // Get primary fabric image (first one in array, or single image)
     let fabric = null;
     if(Array.isArray(obj.images) && obj.images.length>0) fabric = obj.images[0];
@@ -71,14 +111,17 @@ function sync(){
     if(!fabric) return;
 
     const fabricBase = basenameNoExt(fabric).toLowerCase();
-    const fabricExt = path.extname(fabric);
+    // const fabricExt = path.extname(fabric);
     
     // Try exact match: look for Modal-{fabricBase}.{any ext} (case-insensitive)
     let matched = null;
-    for(const m of modelFiles){
-      const mBase = basenameNoExt(m).toLowerCase();
-      // Exact match: "Modal-" + fabric base name
-      if(mBase === ('modal-' + fabricBase) || mBase === fabricBase) {
+    for (const m of candidateModels) {
+      const mBase = basenameNoExt(path.basename(m)).toLowerCase();
+    
+      if (
+        mBase === expectedPrefix + fabricBase ||
+        mBase === fabricBase
+      ) {
         matched = m;
         break;
       }
@@ -90,12 +133,13 @@ function sync(){
       if(numMatch){
         const num = numMatch[1];
         // Look for model file that starts with Modal-{number}
-        for(const m of modelFiles){
-          const mBase = basenameNoExt(m).toLowerCase();
-          if(mBase.match(new RegExp(`^modal-${num}($|-)`))) {
-            matched = m;
-            break;
-          }
+        for (const m of candidateModels) {
+            const mBase = basenameNoExt(path.basename(m)).toLowerCase();
+        
+            if (mBase.match(new RegExp(`^${expectedPrefix}${num}($|-)`))) {
+                matched = m;
+                break;
+            }
         }
       }
     }
@@ -122,7 +166,9 @@ function sync(){
       execSync('git config user.email "github-actions[bot]@users.noreply.github.com"');
       execSync('git config user.name "github-actions[bot]"');
       // Stage files
-      execSync('git add content/gallery/*.json content/gallery/index.json uploads/models/*', { stdio: 'inherit' });
+      execSync('git add -A content/gallery uploads/models', {
+          stdio: 'inherit'
+      });
 
       const githubToken = process.env.GITHUB_TOKEN;
       const repoEnv = process.env.GITHUB_REPOSITORY; // owner/repo
