@@ -65,6 +65,7 @@ function sync(){
   }
 
   const modelFiles = getModelFiles(modelsDir);
+  console.log(modelFiles);
 
   const changed = [];
 
@@ -111,7 +112,6 @@ function sync(){
     if(!fabric) return;
 
     const fabricBase = basenameNoExt(fabric).toLowerCase();
-    // const fabricExt = path.extname(fabric);
     
     // Try exact match: look for Modal-{fabricBase}.{any ext} (case-insensitive)
     let matched = null;
