@@ -27,7 +27,7 @@ const MODEL_CONFIG = {
   'rayon': {
     folder: 'Rayon',
     prefix: 'Model'
-  }
+  },
   'cotton': {
     folder: 'Cotton',
     prefix: 'Model'
