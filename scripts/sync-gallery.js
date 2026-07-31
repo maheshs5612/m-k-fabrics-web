@@ -17,7 +17,7 @@ const MODEL_CONFIG = {
     prefix: 'Model'
   },
   'poplin': {
-    folder: 'Poplin',
+    folder: 'Popline',
     prefix: 'Model'
   },
   'cotton voile': {
